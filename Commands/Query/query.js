@@ -25,6 +25,35 @@ function getMatchScore(row, query) {
   return Infinity; // no match
 }
 
+function escapeRegex(str) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function findMatchAndDescription(row, query, maxLookahead = 2) {
+  const regex = new RegExp(`\\b${escapeRegex(query)}`, 'i');
+
+  for (let i = 0; i < row.length; i++) {
+    const cell = row[i] || '';
+    if (regex.test(cell)) {
+      // Look rightward for description
+      for (let j = 1; j <= maxLookahead; j++) {
+        const next = row[i + j];
+        if (next && next.trim()) {
+          return {
+            label: row[0] || row[1] || '', // Use A or B as identifier/title
+            description: next,
+            sourceColumn: i,
+            foundIn: row
+          };
+        }
+      }
+      return null; // Match found, but no useful description
+    }
+  }
+
+  return null; // No match at all
+}
+
 module.exports = {
     data: new SlashCommandBuilder()
         .setName("query")
@@ -82,32 +111,15 @@ module.exports = {
             const skipIndexes = new Set([0, 1]);
             
             // Rank all matching rows by score (shortest matched cell)
-            const rankedRows = rows
-              .map(row => ({ row, score: getMatchScore(row, query) }))
-              .filter(entry => entry.score !== Infinity)
-              .sort((a, b) => a.score - b.score); // shortest matching cell first
-            
-            const bestMatch = rankedRows[0]?.row;
+            const match = rows
+              .map(row => findMatchAndDescription(row, query))
+              .find(entry => entry !== null);
+              
+            const output = match
+              ? `${match.label}\n\n${match.description}`
+              : 'No matching entry with a description found.';
 
-            let output;
-
-            if (bestMatch) {
-              const label = bestMatch[0] || bestMatch[1] || '';
-            
-              const content = headers.reduce((obj, h, i) => {
-                if (!skipIndexes.has(i)) {
-                  obj[h] = bestMatch[i] || '';
-                }
-                return obj;
-              }, {});
-            
-              const contentStr = Object.values(content).join('\n').trim();
-              output = `${label}\n\n${contentStr}`;
-            } else {
-              output = 'No matching data found.';
-            }            
-
-            const splitData = output.split("\n"); // Pretty shit solution ngl
+            //const splitData = output.split("\n"); // Pretty shit solution ngl
 
             interaction.reply({
               content: output || 'No matching data found.',
