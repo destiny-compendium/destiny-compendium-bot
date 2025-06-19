@@ -78,10 +78,10 @@ module.exports = {
                 const contentStr = Object.values(content).join('\n').trim();
                 return `${label}\n\n${contentStr}`;
               });
-         
-            console.log(final);    
           
             const output = final.join('\n\n---\n\n'); // Separator between entries
+
+            console.log(output.split("\n"));
 
             interaction.reply({
               content: output || 'No matching data found.',
