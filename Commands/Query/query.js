@@ -80,7 +80,8 @@ module.exports = {
               });
           
             const output = final.join('\n\n---\n\n'); // Separator between entries
-          
+            
+            console.log(output);
             interaction.reply({
               content: output || 'No matching data found.',
               ephemeral: false
