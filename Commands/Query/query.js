@@ -29,6 +29,16 @@ function escapeRegex(str) {
   return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+function failEmbed() {
+  return new EmbedBuilder()
+	  .setColor(0xFF0000)
+	  .setTitle("Query Failed")
+	  .setAuthor({ name: "Destiny Compendium" })
+    .setDescription("Sorry, but your query matched no results.")
+	  .setThumbnail("https://i.imgur.com/MNab4aw.png")
+	  .setTimestamp();
+}
+
 function findMatchAndDescription(row, query, maxLookahead = 2) {
   const regex = new RegExp(`\\b${escapeRegex(query)}`, 'i');
 
@@ -121,16 +131,31 @@ module.exports = {
               .map(row => findMatchAndDescription(row, query))
               .find(entry => entry !== null);
           
-            const output = match
-              ? `**${match.matchedText}**\n\n${match.description}`
-              : 'No matching entry with a description found.';
+            //const output = match
+            //  ? `**${match.matchedText}**\n\n${match.description}`
+            //  : 'No matching entry with a description found.';
 
             //const splitData = output.split("\n"); // Pretty shit solution ngl
-
-            interaction.reply({
-              content: output || 'No matching data found.',
-              ephemeral: false
-            });
+            
+            if (match) {
+              const embed = new EmbedBuilder()
+              	  .setColor(0x00FF00)
+              	  .setTitle(match.matchedText)
+              	  .setAuthor({ name: "Destiny Compendium" })
+                  .setDescription(match.description)
+              	  .setThumbnail("https://i.imgur.com/iR1JvU5.png")
+              	  .setTimestamp();
+              
+              interaction.reply({
+                embeds: [embed],
+                ephemeral: false
+              });
+            } else {
+              interaction.reply({
+                embeds: [failEmbed()],
+                ephemeral: false
+              });
+            }
 
             return;
         },
