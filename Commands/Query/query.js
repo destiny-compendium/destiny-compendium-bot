@@ -12,6 +12,19 @@ function escapeRegex(str) {
     return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+function getMatchScore(row, query) {
+  const regex = new RegExp(`\\b${escapeRegex(query)}`, 'i');
+
+  for (let i = 0; i < row.length; i++) {
+    const cell = row[i] || '';
+    if (regex.test(cell)) {
+      return cell.length; // lower = better
+    }
+  }
+
+  return Infinity; // no match
+}
+
 module.exports = {
     data: new SlashCommandBuilder()
         .setName("query")
@@ -68,19 +81,22 @@ module.exports = {
             const columnIndexes = [0, 1];
             const skipIndexes = new Set([0, 1]);
             
-            // Find the first matching row
-            const matchedRow = rows.find(row =>
-              columnIndexes.some(i => regex.test(row[i] || ''))
-            );
+            // Rank all matching rows by score (shortest matched cell)
+            const rankedRows = rows
+              .map(row => ({ row, score: getMatchScore(row, query) }))
+              .filter(entry => entry.score !== Infinity)
+              .sort((a, b) => a.score - b.score); // shortest matching cell first
+            
+            const bestMatch = rankedRows[0]?.row;
 
             let output;
 
-            if (matchedRow) {
-              const label = matchedRow[0] || matchedRow[1] || '';
+            if (bestMatch) {
+              const label = bestMatch[0] || bestMatch[1] || '';
             
               const content = headers.reduce((obj, h, i) => {
                 if (!skipIndexes.has(i)) {
-                  obj[h] = matchedRow[i] || '';
+                  obj[h] = bestMatch[i] || '';
                 }
                 return obj;
               }, {});
@@ -89,7 +105,7 @@ module.exports = {
               output = `${label}\n\n${contentStr}`;
             } else {
               output = 'No matching data found.';
-            }
+            }            
 
             const splitData = output.split("\n"); // Pretty shit solution ngl
 
