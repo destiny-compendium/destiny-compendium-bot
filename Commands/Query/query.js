@@ -54,7 +54,7 @@ function findMatchAndDescription(row, query, maxLookahead = 2) {
         const next = row[i + j];
         if (next && next.trim()) {
           return {
-            matchedText, // exact text that matched
+            matchedText: row[i], 
             label: row[0] || row[1] || '',
             description: next,
             sourceColumn: i,
@@ -69,6 +69,30 @@ function findMatchAndDescription(row, query, maxLookahead = 2) {
 
   return null; // no match
 }
+
+function findMatchAndDescriptionArtifact(row1, row2, query) {
+  const regex = new RegExp(`\\b${escapeRegex(query)}`, 'i');
+
+  for (let i = 0; i < row1.length; i++) {
+    const cell = row1[i] || '';
+    const match = cell.match(regex);
+
+    if (match) {
+      const matchedText = match[0]; // the actual text that matched
+
+      return {
+        matchedText: row1[i], // exact text that matched
+        label: row1[0] || row1[1] || '',
+        description: row2[i],
+        sourceColumn: i,
+        foundIn: row1
+      };
+      return null; // match but no valid description
+    } 
+  }
+  return null; //no match
+}
+
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -129,9 +153,12 @@ module.exports = {
             // Rank all matching rows by score (shortest matched cell)
             const maxLookahead = category === "Exotic Weapons" ? 3 : 2;
             const match = rows
-              .map(row => findMatchAndDescription(row, query, maxLookahead))
+              .map((row, i) =>
+                category === "Artifact Perks"
+                ? findMatchAndDescriptionArtifact(row, rows[i + 1], query)
+                : findMatchAndDescription(row, query, maxLookahead)
+              )
               .find(entry => entry !== null);
-          
             //const output = match
             //  ? `**${match.matchedText}**\n\n${match.description}`
             //  : 'No matching entry with a description found.';
