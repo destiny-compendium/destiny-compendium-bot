@@ -13,6 +13,7 @@
     "discord.js": "^14.20.0",
     "dotenv": "^16.0.3",
     "fs": "^0.0.1-security",
+    "googleapis": "^150.0.1",
     "mongoose": "^7.1.1"
   }
 }

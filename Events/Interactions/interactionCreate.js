@@ -12,7 +12,7 @@ module.exports = {
                 createLog(`User "${interaction.user.id}" tried to run an outdated command!`, "WARNING", false, interaction.guild.id);
             }
 
-            command.execute(interaction, client);
+            await command.execute(interaction, client);
             createLog(`User "${interaction.user.id}" executed an interaction!`, "INFO", false, interaction.guild.id);
         } else if (interaction.isButton()) {
             if (!data) {
@@ -23,18 +23,6 @@ module.exports = {
 
                 interactionCustomId = data.interactionCustomId;
                 roleId = interaction.guild.roles.cache.get(data.role);
-
-                //console.log(interaction.customId);
-                //console.log(data.interactionCustomId);
-
-                if (interaction.customId === data.interactionCustomId) {
-                    return interaction.member.roles.add(roleId)
-                        .then((member) => interaction.reply(
-                            { content: `${roleId} has been assigned to you.`, ephemeral: true }
-                    ));
-                } else {
-                    return interaction.reply({ content: "Undefined Interaction", ephemeral: true });
-                }
             }
         }
     },
