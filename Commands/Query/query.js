@@ -60,28 +60,34 @@ module.exports = {
         
             const [headers, ...rows] = values;
             const regex = new RegExp(query, 'i');  // case-insensitive partial match
-                    
+
             const columnIndexes = [0, 1];
             const skipIndexes = new Set([0, 1]);
-                    
-            const final = rows
-              .filter(row => columnIndexes.some(i => regex.test(row[i] || '')))
-              .map(row => {
-                const label = row[0] || row[1] || ''; // First non-empty A or B
-                const content = headers.reduce((obj, h, i) => {
-                  if (!skipIndexes.has(i)) {
-                    obj[h] = row[i] || '';
-                  }
-                  return obj;
-                }, {});
             
-                const contentStr = Object.values(content).join('\n').trim();
-                return `${label}\n\n${contentStr}`;
-              });
-          
-            const output = final.join('\n\n---\n\n'); // Separator between entries
+            // Find the first matching row
+            const matchedRow = rows.find(row =>
+              columnIndexes.some(i => regex.test(row[i] || ''))
+            );
+            
+            let output;
+            
+            if (matchedRow) {
+              const label = matchedRow[0] || matchedRow[1] || '';
+            
+              const content = headers.reduce((obj, h, i) => {
+                if (!skipIndexes.has(i)) {
+                  obj[h] = matchedRow[i] || '';
+                }
+                return obj;
+              }, {});
+            
+              const contentStr = Object.values(content).join('\n').trim();
+              output = `${label}\n\n${contentStr}`;
+            } else {
+              output = 'No matching data found.';
+            }
 
-            console.log(output.split("\n"));
+            const splitData = output.split("\n"); // Pretty shit solution ngl
 
             interaction.reply({
               content: output || 'No matching data found.',
