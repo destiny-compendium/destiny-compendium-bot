@@ -34,24 +34,30 @@ function findMatchAndDescription(row, query, maxLookahead = 2) {
 
   for (let i = 0; i < row.length; i++) {
     const cell = row[i] || '';
-    if (regex.test(cell)) {
-      // Look rightward for description
+    const match = cell.match(regex);
+
+    if (match) {
+      const matchedText = match[0]; // the actual text that matched
+
+      // Try to find a description in the next few cells
       for (let j = 1; j <= maxLookahead; j++) {
         const next = row[i + j];
         if (next && next.trim()) {
           return {
-            label: row[0] || row[1] || '', // Use A or B as identifier/title
+            matchedText, // exact text that matched
+            label: row[0] || row[1] || '',
             description: next,
             sourceColumn: i,
             foundIn: row
           };
         }
       }
-      return null; // Match found, but no useful description
+
+      return null; // match but no valid description
     }
   }
 
-  return null; // No match at all
+  return null; // no match
 }
 
 module.exports = {
@@ -114,9 +120,9 @@ module.exports = {
             const match = rows
               .map(row => findMatchAndDescription(row, query))
               .find(entry => entry !== null);
-              
+          
             const output = match
-              ? `${match.label}\n\n${match.description}`
+              ? `**${match.matchedText}**\n\n${match.description}`
               : 'No matching entry with a description found.';
 
             //const splitData = output.split("\n"); // Pretty shit solution ngl
