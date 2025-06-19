@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, CommandInteraction, PermissionFlagsBits, range } = require("discord.js");
+const { SlashCommandBuilder, CommandInteraction, PermissionFlagsBits, EmbedBuilder } = require("discord.js");
 const { querySheet } = require("../../Util/querySheet");
 const { content } = require("googleapis/build/src/apis/content");
 
