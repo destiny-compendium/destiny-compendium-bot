@@ -127,9 +127,8 @@ module.exports = {
             const skipIndexes = new Set([0, 1]);
             
             // Rank all matching rows by score (shortest matched cell)
-            const maxLookahead = category === "Exotic Weapons" ? 3 : 2;
             const match = rows
-              .map(row => findMatchAndDescription(row, query, maxLookahead))
+              .map(row => findMatchAndDescription(row, query))
               .find(entry => entry !== null);
           
             //const output = match
