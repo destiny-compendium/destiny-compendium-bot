@@ -8,6 +8,10 @@ function formatRowFromArray(row) {
     return `${label}\n\n${body}`;
 }
 
+function escapeRegex(str) {
+    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 module.exports = {
     data: new SlashCommandBuilder()
         .setName("query")
@@ -59,7 +63,7 @@ module.exports = {
             }
         
             const [headers, ...rows] = values;
-            const regex = new RegExp(query, 'i');  // case-insensitive partial match
+            const regex = new RegExp(`^${escapeRegex(query)}`, 'i');  // case-insensitive partial match
 
             const columnIndexes = [0, 1];
             const skipIndexes = new Set([0, 1]);
@@ -68,9 +72,9 @@ module.exports = {
             const matchedRow = rows.find(row =>
               columnIndexes.some(i => regex.test(row[i] || ''))
             );
-            
+
             let output;
-            
+
             if (matchedRow) {
               const label = matchedRow[0] || matchedRow[1] || '';
             
