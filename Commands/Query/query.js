@@ -77,7 +77,7 @@ function findMatchAndDescriptionArtifact(row1, row2, query) {
     const cell = row1[i] || '';
     const match = cell.match(regex);
 
-    if (nextRow.length === 0) {
+    if (row2.length === 0) {
       return null;
     }
 
