@@ -162,80 +162,135 @@ module.exports = {
               }
             }, 10000); // 60,000 ms = 60 seconds
 
-            const range = category + "!A1:Z";
-            const id = client.sheetid;
+            // Attempt to first query the local cache
+            let cursor = "0";
+            const redisPattern = query + "*"; // Redis wildcard is "*"
+            let firstMatch = null;
 
-            const res = await client.sheets.spreadsheets.values.get({
-                spreadsheetId: id,
-                range,
-                majorDimension: "ROWS",
-            });
-        
-            const values = res.data.values;
-        
-            if (!Array.isArray(values) || values.length === 0) {
-                return []; // no data or sheet is empty
-            }
-        
-            const [headers, ...rows] = values;
-            const regex = new RegExp(`^${escapeRegex(query)}`, 'i');  // case-insensitive partial match
+            do {
+              const { cursor: nextCursor, keys } = await client.redis.scan(cursor, {
+                MATCH: redisPattern,
+                COUNT: 100
+              });
 
-            const columnIndexes = [0, 1];
-            const skipIndexes = new Set([0, 1]);
-            
-            // Rank all matching rows by score (shortest matched cell)
-            const maxLookahead = category === "Exotic Weapons" ? 3 : 2;
-            let match = []
-            
-            try {
-              if (category === "Artifact Perks") {
-                for (let i = 0; i < rows.length - 1; i++) {
-                  match = findMatchAndDescriptionArtifact(rows[i], rows[i+1], query);
-                  if (match !== null) {
-                    break;
-                  }
-                }
-              } else {
-                match = rows
-                  .map(row => findMatchAndDescription(row, query, maxLookahead))
-                  .find(entry => entry !== null);
+              if (keys.length > 0) {
+                firstMatch = keys[0];
+                break;
               }
-              //const output = match
-              //  ? `**${match.matchedText}**\n\n${match.description}`
-              //  : 'No matching entry with a description found.';
 
-              //const splitData = output.split("\n"); // Pretty shit solution ngl
-              
-              if (match) {
+              cursor = nextCursor;
+
+            } while (cursor !== "0");
+
+            // Eh, it works or something
+            if (firstMatch) {
+              const value = await client.redis.get(firstMatch);
+
+              try {
                 const embed = new EmbedBuilder()
                     .setColor(0x00FF00)
-                    .setTitle(match.matchedText)
+                    .setTitle(firstMatch)
                     .setAuthor({ name: "Destiny Compendium" })
-                    .setDescription(match.description)
+                    .setDescription(value)
                     .setThumbnail("https://i.imgur.com/iR1JvU5.png")
                     .setTimestamp();
-                
+
                 interaction.editReply({
                   embeds: [embed],
                   ephemeral: false
                 });
-              } else {
-                interaction.editReply({
-                  embeds: [failEmbed()],
-                  ephemeral: false
-                });
-              }
-              clearTimeout();
-              replied = true;
-
-            } catch (error) {
-              if (!replied) {
-                await interaction.editReply({ embeds: [errorEmbed()] });
+                clearTimeout();
                 replied = true;
+
+              } catch (error) {
+                if (!replied) {
+                  await interaction.editReply({ embeds: [errorEmbed()] });
+                  replied = true;
+                }
+                clearTimeout();
+                console.error(error);
               }
-              clearTimeout();
-              console.error(error);
+            } else {
+              const range = category + "!A1:Z";
+              const id = client.sheetid;
+
+              const res = await client.sheets.spreadsheets.values.get({
+                  spreadsheetId: id,
+                  range,
+                  majorDimension: "ROWS",
+              });
+            
+              const values = res.data.values;
+            
+              if (!Array.isArray(values) || values.length === 0) {
+                  return []; // no data or sheet is empty
+              }
+            
+              const [headers, ...rows] = values;
+              const regex = new RegExp(`^${escapeRegex(query)}`, 'i');  // case-insensitive partial match
+
+              const columnIndexes = [0, 1];
+              const skipIndexes = new Set([0, 1]);
+
+              // Rank all matching rows by score (shortest matched cell)
+              const maxLookahead = category === "Exotic Weapons" ? 3 : 2;
+              let match = [];
+
+              try {
+                if (category === "Artifact Perks") {
+                  for (let i = 0; i < rows.length - 1; i++) {
+                    match = findMatchAndDescriptionArtifact(rows[i], rows[i+1], query);
+                    if (match !== null) {
+                      break;
+                    }
+                  }
+                } else {
+                  match = rows
+                    .map(row => findMatchAndDescription(row, query, maxLookahead))
+                    .find(entry => entry !== null);
+                }
+                //const output = match
+                //  ? `**${match.matchedText}**\n\n${match.description}`
+                //  : 'No matching entry with a description found.';
+
+                //const splitData = output.split("\n"); // Pretty shit solution ngl
+
+                if (match) {
+                  const embed = new EmbedBuilder()
+                      .setColor(0x00FF00)
+                      .setTitle(match.matchedText)
+                      .setAuthor({ name: "Destiny Compendium" })
+                      .setDescription(match.description)
+                      .setThumbnail("https://i.imgur.com/iR1JvU5.png")
+                      .setTimestamp();
+
+                  interaction.editReply({
+                    embeds: [embed],
+                    ephemeral: false
+                  });
+                  
+                  // Store in Redis
+                  await client.redis.set(match.matchedText, match.description); 
+                } else {
+                  interaction.editReply({
+                    embeds: [failEmbed()],
+                    ephemeral: false
+                  });
+                }
+                clearTimeout();
+                replied = true;
+
+              } catch (error) {
+                if (!replied) {
+                  await interaction.editReply({ embeds: [errorEmbed()] });
+                  replied = true;
+                }
+                clearTimeout();
+                console.error(error);
+              }
             }
+
+            
 
             return;
         },
