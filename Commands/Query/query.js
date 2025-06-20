@@ -81,7 +81,7 @@ function findMatchAndDescriptionArtifact(row, nextRow, query) {
       return null;
     }
   
-    if (match && nextRow.length > i) {
+    if (match) {
       const matchedText = match[0]; // the actual text that matched
       const desc = nextRow[i-1];
 
