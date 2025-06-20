@@ -73,7 +73,7 @@ function findMatchAndDescription(row, query, maxLookahead = 2) {
 function findMatchAndDescriptionArtifact(row, nextRow, query) {
   const regex = new RegExp(`\\b${escapeRegex(query)}`, 'i');
 
-  for (let i = 0; i < row.length; i++) {
+  for (let i = 1; i < row.length; i++) {
     const cell = row[i] || '';
     const match = cell.match(regex);
 
@@ -83,7 +83,7 @@ function findMatchAndDescriptionArtifact(row, nextRow, query) {
   
     if (match && nextRow.length > i) {
       const matchedText = match[0]; // the actual text that matched
-      const desc = "test";
+      const desc = nextRow[i-1];
 
       return {
         matchedText: row[i], // exact text that matched
