@@ -50,5 +50,7 @@ module.exports = {
                 .setTimestamp();
 
             interaction.editReply({ embeds: [embed], ephermal: true });
+            clearTimeout();
+            replied = true;
         },
 };
