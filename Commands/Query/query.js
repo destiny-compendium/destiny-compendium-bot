@@ -77,6 +77,10 @@ function findMatchAndDescriptionArtifact(row1, row2, query) {
     const cell = row1[i] || '';
     const match = cell.match(regex);
 
+    if (nextRow.length === 0) {
+      return null;
+    }
+
     if (match) {
       const matchedText = match[0]; // the actual text that matched
 
@@ -87,7 +91,6 @@ function findMatchAndDescriptionArtifact(row1, row2, query) {
         sourceColumn: i,
         foundIn: row1
       };
-      return null; // match but no valid description
     } 
   }
   return null; //no match
