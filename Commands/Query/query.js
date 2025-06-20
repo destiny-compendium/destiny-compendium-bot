@@ -129,6 +129,8 @@ module.exports = {
                 return;
             }
 
+            await interaction.deferReply();
+
             const range = category + "!A1:Z";
             const id = client.sheetid;
 
@@ -177,12 +179,12 @@ module.exports = {
               	  .setThumbnail("https://i.imgur.com/iR1JvU5.png")
               	  .setTimestamp();
               
-              interaction.reply({
+              interaction.editReply({
                 embeds: [embed],
                 ephemeral: false
               });
             } else {
-              interaction.reply({
+              interaction.editReply({
                 embeds: [failEmbed()],
                 ephemeral: false
               });
