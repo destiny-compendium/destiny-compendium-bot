@@ -87,7 +87,7 @@ function findMatchAndDescriptionArtifact(row1, row2, query) {
       return {
         matchedText: row1[i], // exact text that matched
         label: row1[0] || row1[1] || '',
-        description: "test",
+        description: row2[i],
         sourceColumn: i,
         foundIn: row1
       };
