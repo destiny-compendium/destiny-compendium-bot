@@ -171,14 +171,18 @@ module.exports = {
             let match = []
             
             try {
-              match = rows
-                .map((row, i) =>
-                  category === "Artifact Perks"
-                  ? findMatchAndDescriptionArtifact(row, rows[i + 1], query)
-                  : findMatchAndDescription(row, query, maxLookahead)
-                )
-                .find(entry => entry !== null);
-
+              if (category === "Artifact Perks") {
+                for (let i = 0; i < rows.length - 1; i++) {
+                  match = findMatchAndDescriptionArtifact(rows[i], rows[i+1], query);
+                  if (match !== null) {
+                    break;
+                  }
+                }
+              } else {
+                match = rows
+                  .map(row => findMatchAndDescription(row, query, maxLookahead))
+                  .find(entry => entry !== null);
+              }
               //const output = match
               //  ? `**${match.matchedText}**\n\n${match.description}`
               //  : 'No matching entry with a description found.';
