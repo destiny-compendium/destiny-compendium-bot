@@ -55,7 +55,7 @@ module.exports = {
                     .setTitle("About this Bot")
                     .setAuthor({ name: "Destiny Compendium" })
                     .setDescription(
-                        `The **Destiny Compendium Bot** is a simple bot for querying the **Destiny Data Compendium**, a big spreadsheet of most Destiny 2 number tests.\nIts data is refreshed every weekly reset (it doesn't actively track the spreadsheet).\n
+                        `The **Destiny Compendium Bot** is a simple bot for querying the **Destiny Data Compendium**, a big spreadsheet of most Destiny 2 number tests.\nIts data is refreshed 2 days after every weekly reset (it doesn't actively track the spreadsheet).\n
                         Help for the bot is accessible via **/help**\n
                         Written by DcruBro and zShiso\n
                         This bot is not affiliated with the team behind the Destiny Compendium spreadsheet.`
