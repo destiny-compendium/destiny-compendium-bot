@@ -184,6 +184,7 @@ module.exports = {
 
             // Eh, it works or something
             if (firstMatch) {
+              console.log("Query cache hit, using that.");
               const value = await client.redis.get(firstMatch);
 
               try {
