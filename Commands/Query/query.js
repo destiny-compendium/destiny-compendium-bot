@@ -73,6 +73,10 @@ function findMatchAndDescription(row, query, maxLookahead = 2) {
       for (let j = 1; j <= maxLookahead; j++) {
         const next = row[i + j];
         if (next && next.trim()) {
+          if (row[i].length > 250) {
+            return null;
+          }
+
           const formattedDescription = next.replace(/(\b[x+~-]?\d+(?:\.\d+)?[%a-zA-Z]*\b)/g, '**$1**'); // Bold text
 
           return {
@@ -106,6 +110,10 @@ function findMatchAndDescriptionArtifact(row, nextRow, query) {
     if (match) {
       const matchedText = match[0]; // the actual text that matched
       const desc = nextRow[i-1];
+
+      if (row[i].length > 250) {
+        return null;
+      }
 
       const formattedDescription = desc.replace(/(\b[x+~-]?\d+(?:\.\d+)?[%a-zA-Z]*\b)/g, '**$1**');
 
@@ -232,7 +240,6 @@ module.exports = {
             
               const [headers, ...rows] = values;
               const regex = new RegExp(`^${escapeRegex(query)}`, 'i');  // case-insensitive partial match
-              console.log(rows[0]);
 
               const columnIndexes = [0, 1];
               const skipIndexes = new Set([0, 1]);
