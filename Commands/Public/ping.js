@@ -20,7 +20,7 @@ function timeoutEmbed() {
 	  .setTimestamp();
 }
 
-module.exports = {
+/*module.exports = {
     data: new SlashCommandBuilder()
         .setName("ping")
         .setDescription("Ping the bot. Used as a status check.")
@@ -53,4 +53,4 @@ module.exports = {
             clearTimeout();
             replied = true;
         },
-};
+};*/
