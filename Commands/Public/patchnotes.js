@@ -57,13 +57,10 @@ module.exports = {
                     .setDescription(
                         `**Version 1.0.0**\n
                         This version is the base version, and implements the Bot's basic features:
-                        - **Queries**
-
-                        - **Help guide**
-
-                        - **About section**
-                        
-                        - **This menu**`
+                        **Queries**
+                        **Help guide**
+                        **About section**
+                        **This menu**`
                     )
                     .setThumbnail("https://i.imgur.com/F9KcQzL.png")
                     .setTimestamp();
