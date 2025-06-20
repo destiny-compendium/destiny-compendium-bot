@@ -44,7 +44,7 @@ function errorEmbed() {
 	  .setColor(0xFF0000)
 	  .setTitle("An Error Occurred")
 	  .setAuthor({ name: "Destiny Compendium" })
-    .setDescription("Sorry, but an internal error occurred during your query.")
+    .setDescription("Sorry, but an internal error occurred during your query. **Try being more specifc with your query.**")
 	  .setThumbnail("https://i.imgur.com/MNab4aw.png")
 	  .setTimestamp();
 }
@@ -168,7 +168,7 @@ module.exports = {
 
             // Attempt to first query the local cache
             let cursor = "0";
-            const redisPattern = query + "*"; // Redis wildcard is "*"
+            const redisPattern = "*" + query + "*"; // Redis wildcard is "*"
             let firstMatch = null;
 
             do {
@@ -232,6 +232,7 @@ module.exports = {
             
               const [headers, ...rows] = values;
               const regex = new RegExp(`^${escapeRegex(query)}`, 'i');  // case-insensitive partial match
+              console.log(rows);
 
               const columnIndexes = [0, 1];
               const skipIndexes = new Set([0, 1]);
