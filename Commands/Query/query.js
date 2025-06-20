@@ -70,26 +70,27 @@ function findMatchAndDescription(row, query, maxLookahead = 2) {
   return null; // no match
 }
 
-function findMatchAndDescriptionArtifact(row1, row2, query) {
+function findMatchAndDescriptionArtifact(row, nextRow, query) {
   const regex = new RegExp(`\\b${escapeRegex(query)}`, 'i');
 
-  for (let i = 0; i < row1.length; i++) {
-    const cell = row1[i] || '';
+  for (let i = 0; i < row.length; i++) {
+    const cell = row[i] || '';
     const match = cell.match(regex);
 
-    if (row2.length === 0) {
+    if (nextRow.length === 0) {
       return null;
     }
-
+  
     if (match) {
       const matchedText = match[0]; // the actual text that matched
+      const desc = nextRow[i]
 
       return {
-        matchedText: row1[i], // exact text that matched
-        label: row1[0] || row1[1] || '',
-        description: row2[i],
+        matchedText: row[i], // exact text that matched
+        label: row[0] || row[1] || '',
+        description: desc,
         sourceColumn: i,
-        foundIn: row1
+        foundIn: row
       };
     } 
   }
