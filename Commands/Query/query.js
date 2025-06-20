@@ -39,6 +39,26 @@ function failEmbed() {
 	  .setTimestamp();
 }
 
+function errorEmbed() {
+  return new EmbedBuilder()
+	  .setColor(0xFF0000)
+	  .setTitle("An Error Occurred")
+	  .setAuthor({ name: "Destiny Compendium" })
+    .setDescription("Sorry, but an internal error occurred during your query.")
+	  .setThumbnail("https://i.imgur.com/MNab4aw.png")
+	  .setTimestamp();
+}
+
+function timeoutEmbed() {
+  return new EmbedBuilder()
+	  .setColor(0xFF0000)
+	  .setTitle("Query Timed Out")
+	  .setAuthor({ name: "Destiny Compendium" })
+    .setDescription("Sorry, but your query timed out during processing.")
+	  .setThumbnail("https://i.imgur.com/MNab4aw.png")
+	  .setTimestamp();
+}
+
 function findMatchAndDescription(row, query, maxLookahead = 2) {
   const regex = new RegExp(`\\b${escapeRegex(query)}`, 'i');
 
@@ -137,7 +157,7 @@ module.exports = {
             // Set your timeout (e.g., 60 seconds)
             const timeout = setTimeout(async () => {
               if (!replied) {
-                await interaction.editReply('⏳ Timed out.');
+                await interaction.editReply({ embeds: [timeoutEmbed()] });
                 replied = true;
               }
             }, 10000); // 60,000 ms = 60 seconds
@@ -210,7 +230,7 @@ module.exports = {
 
             } catch (error) {
               if (!replied) {
-                await interaction.editReply('❌ An error occurred.');
+                await interaction.editReply({ embeds: [errorEmbed()] });
                 replied = true;
               }
               clearTimeout();
