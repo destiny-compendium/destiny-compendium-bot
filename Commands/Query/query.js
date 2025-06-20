@@ -73,10 +73,12 @@ function findMatchAndDescription(row, query, maxLookahead = 2) {
       for (let j = 1; j <= maxLookahead; j++) {
         const next = row[i + j];
         if (next && next.trim()) {
+          const formattedDescription = next.replace(/(\d)(\S)/g, '**$1$2**'); // Bold text
+
           return {
             matchedText: row[i], 
             label: row[0] || row[1] || '',
-            description: next,
+            description: formattedDescription,
             sourceColumn: i,
             foundIn: row
           };
@@ -105,10 +107,12 @@ function findMatchAndDescriptionArtifact(row, nextRow, query) {
       const matchedText = match[0]; // the actual text that matched
       const desc = nextRow[i-1];
 
+      const formattedDescription = desc.replace(/(\d)(\S)/g, '**$1$2**');
+
       return {
         matchedText: row[i], // exact text that matched
         label: row[0] || row[1] || '',
-        description: desc,
+        description: formattedDescription,
         sourceColumn: i,
         foundIn: row
       };
