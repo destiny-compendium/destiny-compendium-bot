@@ -157,16 +157,21 @@ module.exports = {
             
             // Rank all matching rows by score (shortest matched cell)
             const maxLookahead = category === "Exotic Weapons" ? 3 : 2;
-            const match = rows
-              .map((row, i) => {
-                if (category === "Artifact Perks") {
-                  const nextRow = rows[i + 1] || []; // safely handle end of array
-                  return findMatchAndDescriptionArtifact(row, nextRow, query);
-                } else {
-                  return findMatchAndDescription(row, query, maxLookahead);
+            let match = []
+            
+
+            if (category === "Artifact Perks") {
+              for (let i = 0; i < rows.length - 1; i++) {
+                match = findMatchAndDescriptionArtifact(rows[i], rows[i+1], query);
+                if (match !== null) {
+                  break;
                 }
-              }) 
-              .find(entry => entry !== null);
+              }
+            } else {
+              match = rows
+                .map(row => findMatchAndDescription(row, query, maxLookahead))
+                .find(entry => entry !== null);
+            }
             //const output = match
             //  ? `**${match.matchedText}**\n\n${match.description}`
             //  : 'No matching entry with a description found.';
