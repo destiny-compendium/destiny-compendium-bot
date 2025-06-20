@@ -135,6 +135,16 @@ module.exports = {
 
             await interaction.deferReply();
 
+            let replied = false;
+
+            // Set your timeout (e.g., 60 seconds)
+            const timeout = setTimeout(async () => {
+              if (!replied) {
+                await interaction.editReply('⏳ Timed out.');
+                replied = true;
+              }
+            }, 10000); // 60,000 ms = 60 seconds
+
             const range = category + "!A1:Z";
             const id = client.sheetid;
 
@@ -160,43 +170,54 @@ module.exports = {
             const maxLookahead = category === "Exotic Weapons" ? 3 : 2;
             let match = []
             
-
-            if (category === "Artifact Perks") {
-              for (let i = 0; i < rows.length - 1; i++) {
-                match = findMatchAndDescriptionArtifact(rows[i], rows[i+1], query);
-                if (match !== null) {
-                  break;
+            try {
+              if (category === "Artifact Perks") {
+                for (let i = 0; i < rows.length - 1; i++) {
+                  match = findMatchAndDescriptionArtifact(rows[i], rows[i+1], query);
+                  if (match !== null) {
+                    break;
+                  }
                 }
+              } else {
+                match = rows
+                  .map(row => findMatchAndDescription(row, query, maxLookahead))
+                  .find(entry => entry !== null);
               }
-            } else {
-              match = rows
-                .map(row => findMatchAndDescription(row, query, maxLookahead))
-                .find(entry => entry !== null);
-            }
-            //const output = match
-            //  ? `**${match.matchedText}**\n\n${match.description}`
-            //  : 'No matching entry with a description found.';
+              //const output = match
+              //  ? `**${match.matchedText}**\n\n${match.description}`
+              //  : 'No matching entry with a description found.';
 
-            //const splitData = output.split("\n"); // Pretty shit solution ngl
-            
-            if (match) {
-              const embed = new EmbedBuilder()
-              	  .setColor(0x00FF00)
-              	  .setTitle(match.matchedText)
-              	  .setAuthor({ name: "Destiny Compendium" })
-                  .setDescription(match.description)
-              	  .setThumbnail("https://i.imgur.com/iR1JvU5.png")
-              	  .setTimestamp();
+              //const splitData = output.split("\n"); // Pretty shit solution ngl
               
-              interaction.editReply({
-                embeds: [embed],
-                ephemeral: false
-              });
-            } else {
-              interaction.editReply({
-                embeds: [failEmbed()],
-                ephemeral: false
-              });
+              if (match) {
+                const embed = new EmbedBuilder()
+                    .setColor(0x00FF00)
+                    .setTitle(match.matchedText)
+                    .setAuthor({ name: "Destiny Compendium" })
+                    .setDescription(match.description)
+                    .setThumbnail("https://i.imgur.com/iR1JvU5.png")
+                    .setTimestamp();
+                
+                interaction.editReply({
+                  embeds: [embed],
+                  ephemeral: false
+                });
+              } else {
+                interaction.editReply({
+                  embeds: [failEmbed()],
+                  ephemeral: false
+                });
+              }
+              clearTimeout();
+              replied = true;
+
+            } catch (error) {
+              if (!replied) {
+                await interaction.editReply('❌ An error occurred.');
+                replied = true;
+              }
+              clearTimeout();
+              console.error(error);
             }
 
             return;
