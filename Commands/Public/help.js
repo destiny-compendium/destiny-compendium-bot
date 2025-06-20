@@ -57,7 +57,8 @@ module.exports = {
                     .setDescription(
                         `**/query <category> <query>**\nQueries the Destiny Compendium spreadsheet for your desired **query** in the selected **category**.\n
                         **/help**\nDisplay this menu.\n
-                        **/info**\nDisplay bot info`
+                        **/info**\nDisplay bot info\n
+                        **/patchnotes**\nBot patch notes`
                     )
                     .setThumbnail("https://i.imgur.com/F9KcQzL.png")
                     .setTimestamp();
