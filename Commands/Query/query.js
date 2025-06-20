@@ -116,11 +116,8 @@ module.exports = {
                 { name: "Strand", value: "Strand" },
                 { name: "Prismatic", value: "Prismatic" },
                 { name: "Exotic Class", value: "Exotic Class" },
-                { name: "Class Abilities", value: "Class Abilities" },
                 { name: "Exotic Weapons", value: "Exotic Weapons" },
                 { name: "Exotic Armor", value: "Exotic Armors" },
-                { name: "Game Mechanics", value: "Game Mechanics" },
-                { name: "Seasonal Mechanics", value: "Seasonal Mechanics" },
         ))
         .addStringOption(option => option.setName("query").setDescription("Query string").setRequired(true)),
 
