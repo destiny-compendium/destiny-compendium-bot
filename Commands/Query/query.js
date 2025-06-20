@@ -212,11 +212,11 @@ module.exports = {
               replied = true;
 
             } catch (error) {
-              if (!replied) {
-                await interaction.editReply('❌ An error occurred.');
-                replied = true;
-              }
-              clearTimeout();
+              // if (!replied) {
+              //   await interaction.editReply('❌ An error occurred.');
+              //   replied = true;
+              // }
+              // clearTimeout();
               console.error(error);
             }
 
