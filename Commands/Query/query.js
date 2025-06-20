@@ -232,7 +232,7 @@ module.exports = {
             
               const [headers, ...rows] = values;
               const regex = new RegExp(`^${escapeRegex(query)}`, 'i');  // case-insensitive partial match
-              console.log(rows);
+              console.log(rows[0]);
 
               const columnIndexes = [0, 1];
               const skipIndexes = new Set([0, 1]);
