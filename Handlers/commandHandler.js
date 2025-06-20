@@ -12,6 +12,7 @@ function loadCommands(client) {
         const commandFiles = fs.readdirSync(`./Commands/${folder}`).filter((file) => file.endsWith('.js'));
 
         for (const file of commandFiles) {
+            if (file.startsWith("ping")) { continue; }
             const commandFile = require(`../Commands/${folder}/${file}`);
             
             client.commands.set(commandFile.data.name, commandFile);
