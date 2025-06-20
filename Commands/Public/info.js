@@ -32,8 +32,8 @@ function timeoutEmbed() {
 
 module.exports = {
     data: new SlashCommandBuilder()
-        .setName("help")
-        .setDescription("Bot help menu")
+        .setName("info")
+        .setDescription("Display bot info")
         .setDefaultMemberPermissions(PermissionFlagsBits.Everyone),
 
         async execute(interaction, client) {
@@ -52,12 +52,13 @@ module.exports = {
             try {
                 const embed = new EmbedBuilder()
                     .setColor(0x0000FF)
-                    .setTitle("Help Menu")
+                    .setTitle("About this Bot")
                     .setAuthor({ name: "Destiny Compendium" })
                     .setDescription(
-                        `**/query <category> <query>**\nQueries the Destiny Compendium spreadsheet for your desired **query** in the selected **category**.\n
-                        **/help**\nDisplay this menu.\n
-                        **/info**\nDisplay bot info`
+                        `The **Destiny Compendium Bot** is a simple bot for querying the **Destiny Data Compendium**, a big spreadsheet of most Destiny 2 number tests.\nIts data is refreshed every weekly reset (it doesn't actively track the spreadsheet).\n
+                        Help for the bot is accessible via **/help**\n
+                        Written by DcruBro and zShiso\n
+                        This bot is not affiliated with the team behind the Destiny Compendium spreadsheet.`
                     )
                     .setThumbnail("https://i.imgur.com/F9KcQzL.png")
                     .setTimestamp();
