@@ -25,7 +25,7 @@ client.sheets = sheets;
 client.sheetid = "1WaxvbLx7UoSZaBqdFr1u32F2uWVLo-CJunJB4nlGUE4"; // This is the ID for the google sheet
 
 client.login(process.env.TOKEN).then(() => {
-    client.application.commands.set([]); // Unregister commands to prevernt orphaned commands
+    //client.application.commands.set([]); // Unregister commands to prevernt orphaned commands
     loadEvents(client);
     loadCommands(client);
 });
