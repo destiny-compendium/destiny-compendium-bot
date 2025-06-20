@@ -55,7 +55,8 @@ module.exports = {
                     .setTitle("Help Menu")
                     .setAuthor({ name: "Destiny Compendium" })
                     .setDescription(
-                        `**/query <category> <query>** - Queries the Destiny Compendium spreadsheet for your desired **query** in the selected **category**.`
+                        `**/query <category> <query>**\nQueries the Destiny Compendium spreadsheet for your desired **query** in the selected **category**.\n\n
+                        **/help\nDisplay this menu.`
                     )
                     .setThumbnail("https://i.imgur.com/iR1JvU5.png")
                     .setTimestamp();
