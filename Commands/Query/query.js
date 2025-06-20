@@ -77,7 +77,7 @@ function findMatchAndDescription(row, query, maxLookahead = 2) {
             return null;
           }
 
-          const formattedDescription = next.replace(/(\b[x+~-]?\d+(?:\.\d+)?(?:[+x*/-]\d+)*(?:[%a-zA-Z]+)?\b)/g, '**$1**'); // Bold text
+          const formattedDescription = next.replace(/(\[?[x+~-]?\d+(?:\.\d+)?(?:[+x*/-]\d+)*(?:[%a-zA-Z]+)?\]?)/g, '**$1**'); // Bold text
 
           return {
             matchedText: row[i], 
@@ -115,7 +115,7 @@ function findMatchAndDescriptionArtifact(row, nextRow, query) {
         return null;
       }
 
-      const formattedDescription = desc.replace(/(\b[x+~-]?\d+(?:\.\d+)?(?:[+x*/-]\d+)*(?:[%a-zA-Z]+)?\b)/g, '**$1**');
+      const formattedDescription = desc.replace(/(\[?[x+~-]?\d+(?:\.\d+)?(?:[+x*/-]\d+)*(?:[%a-zA-Z]+)?\]?)/g, '**$1**');
 
       return {
         matchedText: row[i], // exact text that matched
