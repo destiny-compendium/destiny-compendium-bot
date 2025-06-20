@@ -52,7 +52,7 @@ function errorEmbed() {
 function timeoutEmbed() {
   return new EmbedBuilder()
 	  .setColor(0xFF0000)
-	  .setTitle("Query Timed Out")
+	  .setTitle("Timed Out")
 	  .setAuthor({ name: "Destiny Compendium" })
     .setDescription("Sorry, but your query timed out during processing.")
 	  .setThumbnail("https://i.imgur.com/MNab4aw.png")

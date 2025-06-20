@@ -10,13 +10,34 @@ function errorEmbed() {
 	  .setTimestamp();
 }
 
+function timeoutEmbed() {
+  return new EmbedBuilder()
+	  .setColor(0xFF0000)
+	  .setTitle("Timed Out")
+	  .setAuthor({ name: "Destiny Compendium" })
+      .setDescription("Sorry, but your query timed out during processing.")
+	  .setThumbnail("https://i.imgur.com/MNab4aw.png")
+	  .setTimestamp();
+}
+
 module.exports = {
     data: new SlashCommandBuilder()
         .setName("ping")
         .setDescription("Ping the bot. Used as a status check.")
         .setDefaultMemberPermissions(PermissionFlagsBits.Everyone),
 
-        execute(interaction) {
+        async execute(interaction) {
+            await interaction.deferReply();
+            let replied = false;
+            
+            // Set your timeout (e.g., 60 seconds)
+            const timeout = setTimeout(async () => {
+              if (!replied) {
+                await interaction.editReply({ embeds: [timeoutEmbed()] });
+                replied = true;
+              }
+            }, 10000); // 60,000 ms = 60 seconds
+
             const d1 = new Date();
             let t1 = d1.getTime();
 
@@ -28,6 +49,6 @@ module.exports = {
                 .setThumbnail("https://i.imgur.com/iR1JvU5.png")
                 .setTimestamp();
 
-            interaction.reply({ embeds: [embed], ephermal: true });
+            interaction.editReply({ embeds: [embed], ephermal: true });
         },
 };
