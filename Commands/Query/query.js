@@ -234,7 +234,7 @@ module.exports = {
 
               // Rank all matching rows by score (shortest matched cell)
               const maxLookahead = category === "Exotic Weapons" ? 3 : 2;
-              const isArtifact = (category === "Artifact Perks" || category === "Old Episodic Artifact Perks")=;
+              const isArtifact = (category === "Artifact Perks" || category === "Old Episodic Artifact Perks");
               let match = [];
 
               try {
