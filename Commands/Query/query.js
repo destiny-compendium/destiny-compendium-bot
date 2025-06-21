@@ -66,7 +66,7 @@ function findMatchAndDescription(row, prevRow, nextRow, query, maxLookahead, isA
       let validDesc = False;
       
       if (isArtifact) {
-        if (nextRow.length === 0) {
+        if (nextRow === null || nextRow.length === 0) {
           return null;
         }
         description = nextRow[i - 1];
@@ -242,7 +242,7 @@ module.exports = {
                   let prev = null;
                   let next = null;
                   if (i !== 0) { prev = rows[i-1] }
-                  if (i !== rows.length - 1) { next = rows[i+1] }
+                  if (i !== rows.length - 2) { next = rows[i+1] }
                   match = findMatchAndDescription(rows[i], prev, next, query, maxLookahead, isArtifact);
                   if (match !== null) {
                     break;
