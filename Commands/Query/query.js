@@ -3,6 +3,7 @@ const { querySheet } = require("../../Util/querySheet");
 const { content } = require("googleapis/build/src/apis/content");
 
 const grenadeAspects = ["Touch of Flame", "Touch of Winter", "Touch of Thunder", "Mindspun Invocation", "Chaos Accelerant"];
+const ignoreGrenadeList = ["grapple", "axion bolt", "void spike", "void wall"];
 
 function formatRowFromArray(row) {
     const label = row[0] || row[1] || '';      // Column A or B
@@ -60,6 +61,7 @@ function findMatchAndDescription(row, prevRow, query, maxLookahead = 2) {
 
     if (match) {
       const matchedText = match[0]; // the actual text that matched
+      const normalize = str => str.toLowerCase().replace(/['\s-]/g, '');
       
       // Try to find a description in the next few cells
       for (let j = 1; j <= maxLookahead; j++) {
@@ -70,7 +72,11 @@ function findMatchAndDescription(row, prevRow, query, maxLookahead = 2) {
           }
 
           if (grenadeAspects.includes(row[i])) {
-            if (prevRow !== null && typeof prevRow[i] === 'string' && prevRow[i].toLowerCase().includes("grenade")) {
+            if (
+              prevRow !== null && 
+              typeof prevRow[i] === 'string' && 
+              ignoreGrenadeList.some(kw => normalize(prevRow[i]).includes(kw))
+            ) {
               return null;
             }
           }
