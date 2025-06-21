@@ -63,7 +63,7 @@ function findMatchAndDescription(row, prevRow, nextRow, query, maxLookahead, isA
       const matchedText = match[0]; // the actual text that matched
       const normalize = str => str.toLowerCase().replace(/['\s-]/g, '');
       let description = "";
-      let validDesc = False;
+      let validDesc = false;
       
       if (isArtifact) {
         if (nextRow === null || nextRow.length === 0) {
