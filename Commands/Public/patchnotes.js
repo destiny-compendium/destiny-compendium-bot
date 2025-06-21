@@ -55,7 +55,9 @@ module.exports = {
                     .setTitle("Patch Notes")
                     .setAuthor({ name: "Destiny Compendium" })
                     .setDescription(
-                        `**Version 1.0.2** (21/06/2025)\n
+                        `**Version 1.0.3** (21/06/2025)\n
+                        This version fixes aspects that modify grenades. Previously it would show the first modification, but it now correctly shows the actual entry.\n\n
+                        **Version 1.0.2** (21/06/2025)\n
                         This version makes queries looser. It ignores characters like apostrophes, spaces and dashes, so you can be less specific and still get matches.`
                     )
                     .setThumbnail("https://i.imgur.com/F9KcQzL.png")
