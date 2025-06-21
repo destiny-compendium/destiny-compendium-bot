@@ -8,25 +8,8 @@ function formatRowFromArray(row) {
     return `${label}\n\n${body}`;
 }
 
-function escapeRegex(str) {
-    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
 function normalizeForFuzzyMatch(str) {
-  return escapeRegex(str).replace(/['\s-]+/g, '.*?');
-}
-
-function getMatchScore(row, query) {
-  const regex = new RegExp(`\\b${escapeRegex(query)}`, 'i');
-
-  for (let i = 0; i < row.length; i++) {
-    const cell = row[i] || '';
-    if (regex.test(cell)) {
-      return cell.length; // lower = better
-    }
-  }
-
-  return Infinity; // no match
+  return escapeRegex(str).replace(/[' -]/g, '');
 }
 
 function escapeRegex(str) {
