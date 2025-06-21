@@ -2,6 +2,8 @@ const { SlashCommandBuilder, CommandInteraction, PermissionFlagsBits, EmbedBuild
 const { querySheet } = require("../../Util/querySheet");
 const { content } = require("googleapis/build/src/apis/content");
 
+const grenadeAspects = ["Touch of Flame", "Touch of Winter", "Touch of Thunder", "Mindspun Invocation", "Chaos Accelerant"];
+
 function formatRowFromArray(row) {
     const label = row[0] || row[1] || '';      // Column A or B
     const body = row.slice(2).join('\n').trim(); // Columns C onward
@@ -46,7 +48,7 @@ function timeoutEmbed() {
 	  .setTimestamp();
 }
 
-function findMatchAndDescription(row, query, maxLookahead = 2) {
+function findMatchAndDescription(row, prevRow, query, maxLookahead = 2) {
   const cleanQuery = normalizeForFuzzyMatch(query);
   const regex = new RegExp(`\\b${cleanQuery}`, 'i');
 
@@ -58,13 +60,19 @@ function findMatchAndDescription(row, query, maxLookahead = 2) {
 
     if (match) {
       const matchedText = match[0]; // the actual text that matched
-
+      
       // Try to find a description in the next few cells
       for (let j = 1; j <= maxLookahead; j++) {
         const next = row[i + j];
         if (next && next.trim()) {
           if (row[i].length > 250) {
             return null;
+          }
+
+          if (grenadeAspects.includes(row[i])) {
+            if (prevRow !== null && typeof prevRow[i] === 'string' && prevRow[i].toLowerCase().includes("grenade")) {
+              return null;
+            }
           }
 
           const formattedDescription = next.replace(/(\[?[x+~-]?\d+(?:\.\d+)?(?:[+x*/-]\d+)*(?:[%a-zA-Z]+)?\]?)/g, '**$1**'); // Bold text
@@ -251,9 +259,18 @@ module.exports = {
                     }
                   }
                 } else {
-                  match = rows
+                  for (let i = 0; i < rows.length; i++) {
+                    let prev = null;
+                    if (i !== 0) { prev = rows[i-1] }
+                    match = findMatchAndDescription(row, prev, query, maxLookahead);
+                    if (match !== null) {
+                      break;
+                    }
+                  }
+                  /*match = rows
                     .map(row => findMatchAndDescription(row, query, maxLookahead))
                     .find(entry => entry !== null);
+                  */
                 }
                 //const output = match
                 //  ? `**${match.matchedText}**\n\n${match.description}`
