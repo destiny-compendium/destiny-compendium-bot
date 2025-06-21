@@ -55,8 +55,8 @@ module.exports = {
                     .setTitle("Patch Notes")
                     .setAuthor({ name: "Destiny Compendium" })
                     .setDescription(
-                        `**Version 1.0.1** (21/06/2025)\n
-                        This version adds support for querying **Old Episodic Artifact Perks**. Old Seasonal Artifact Perks are not yet supported.`
+                        `**Version 1.0.2** (21/06/2025)\n
+                        This version makes queries looser. It ignores characters like apostrophes, spaces and dashes, so you can be less specific and still get matches.`
                     )
                     .setThumbnail("https://i.imgur.com/F9KcQzL.png")
                     .setTimestamp();
