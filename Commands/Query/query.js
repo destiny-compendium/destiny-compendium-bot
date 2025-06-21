@@ -2,7 +2,7 @@ const { SlashCommandBuilder, CommandInteraction, PermissionFlagsBits, EmbedBuild
 const { querySheet } = require("../../Util/querySheet");
 const { content } = require("googleapis/build/src/apis/content");
 
-const grenadeAspects = ["Touch of Flame", "Touch of Winter", "Touch of Thunder", "Mindspun Invocation", "Chaos Accelerant (Charged)", "Chaos Accelerant"];
+const grenadeAspects = ["Touch of Flame", "Touch of Winter", "Touch of Thunder", "Mindspun Invocation", "Chaos Accelerant (Charged)", "Chaos Accelerant", "Chaos Accelerant\n(Charged)"];
 const ignoreGrenadeList = ["grenade", "grapple", "axion", "void"];
 
 function formatRowFromArray(row) {
