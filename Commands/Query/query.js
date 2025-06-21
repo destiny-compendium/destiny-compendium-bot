@@ -72,6 +72,7 @@ function findMatchAndDescription(row, prevRow, query, maxLookahead = 2) {
           }
 
           if (grenadeAspects.includes(row[i])) {
+            console.log(normalize(prevRow[i]));
             if (
               prevRow !== null && 
               typeof prevRow[i] === 'string' && 
