@@ -51,7 +51,7 @@ function timeoutEmbed() {
 
 function findMatchAndDescription(row, prevRow, query, maxLookahead = 2) {
   const cleanQuery = normalizeForFuzzyMatch(query);
-  const regex = new RegExp(`\\b${cleanQuery}`, 'i');
+  const regex = new RegExp(cleanQuery, 'i');
 
   for (let i = 0; i < row.length; i++) {
     const cell = row[i] || '';
