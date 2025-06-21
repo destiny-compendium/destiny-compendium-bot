@@ -71,7 +71,7 @@ function findMatchAndDescription(row, prevRow, query, maxLookahead = 2) {
             return null;
           }
 
-          if (grenadeAspects.includes(row[i])) {
+          if (grenadeAspects.includes(row[i]) || row[i].toLowerCase().includes("handheld")) {
             console.log(row[i]);
             if (row[i].includes("Chaos Accelerant")) {
               return null;
