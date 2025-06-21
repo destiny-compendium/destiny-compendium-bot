@@ -102,7 +102,7 @@ function findMatchAndDescription(row, prevRow, query, maxLookahead = 2) {
 
 function findMatchAndDescriptionArtifact(row, nextRow, query) {
   const cleanQuery = normalizeForFuzzyMatch(query);
-  const regex = new RegExp(`\\b${cleanQuery}`, 'i');
+  const regex = new RegExp(cleanQuery, 'i');
 
   for (let i = 1; i < row.length; i++) {
     const cell = row[i] || '';
