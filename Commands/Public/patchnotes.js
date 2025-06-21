@@ -55,12 +55,8 @@ module.exports = {
                     .setTitle("Patch Notes")
                     .setAuthor({ name: "Destiny Compendium" })
                     .setDescription(
-                        `**Version 1.0.0**\n
-                        This version is the base version, and implements the Bot's basic features:
-                        **Queries**
-                        **Help guide**
-                        **About section**
-                        **This menu**`
+                        `**Version 1.0.1** (21/06/2025)\n
+                        This version adds support for querying **Old Episodic Artifact Perks**. Old Seasonal Artifact Perks are not yet supported.`
                     )
                     .setThumbnail("https://i.imgur.com/F9KcQzL.png")
                     .setTimestamp();
