@@ -49,7 +49,7 @@ function timeoutEmbed() {
 	  .setTimestamp();
 }
 
-function findMatchAndDescription(row, prevRow, query, maxLookahead = 2) {
+function findMatchAndDescription(row, prevRow, nextRow, query, maxLookahead, isArtifact) {
   const cleanQuery = normalizeForFuzzyMatch(query);
   const regex = new RegExp(cleanQuery, 'i');
 
@@ -62,78 +62,58 @@ function findMatchAndDescription(row, prevRow, query, maxLookahead = 2) {
     if (match) {
       const matchedText = match[0]; // the actual text that matched
       const normalize = str => str.toLowerCase().replace(/['\s-]/g, '');
+      let description = "";
+      let validDesc = False;
       
-      // Try to find a description in the next few cells
-      for (let j = 1; j <= maxLookahead; j++) {
-        const next = row[i + j];
-        if (next && next.trim()) {
-          if (row[i].length > 250) {
-            return null;
-          }
-
-          if (grenadeAspects.includes(row[i]) || row[i].toLowerCase().includes("handheld")) {
-            if (
-              prevRow !== null && 
-              typeof prevRow[i] === 'string' && 
-              ignoreGrenadeList.some(kw => normalize(prevRow[i]).includes(kw))
-            ) {
+      if (isArtifact) {
+        if (nextRow.length === 0) {
+          return null;
+        }
+        description = nextRow[i - 1];
+        validDesc = true;
+      } else {
+        // Try to find a description in the next few cells
+        for (let j = 1; j <= maxLookahead; j++) {
+          const next = row[i + j];
+          if (next && next.trim()) {
+            if (row[i].length > 250) {
               return null;
             }
+
+            if (grenadeAspects.includes(row[i]) || row[i].toLowerCase().includes("handheld")) {
+              if (
+                prevRow !== null && 
+                typeof prevRow[i] === 'string' && 
+                ignoreGrenadeList.some(kw => normalize(prevRow[i]).includes(kw))
+              ) {
+                return null;
+              }
+            }
+            description = next;
+            validDesc = true;
+            break;
           }
-
-          const formattedDescription = next.replace(/(\[?[x+~-]?\d+(?:\.\d+)?(?:[+x*/-]\d+)*(?:[%a-zA-Z]+)?\]?)/g, '**$1**'); // Bold text
-
-          return {
-            matchedText: row[i], 
-            label: row[0] || row[1] || '',
-            description: formattedDescription,
-            sourceColumn: i,
-            foundIn: row
-          };
         }
       }
 
-      return null; // match but no valid description
-    }
-  }
-
-  return null; // no match
-}
-
-function findMatchAndDescriptionArtifact(row, nextRow, query) {
-  const cleanQuery = normalizeForFuzzyMatch(query);
-  const regex = new RegExp(`\\b${cleanQuery}`, 'i');
-
-  for (let i = 1; i < row.length; i++) {
-    const cell = row[i] || '';
-    const normalizedCell = cell.replace(/[' -]/g, '');
-
-    if (nextRow.length === 0) {
-      return null;
-    }
-
-    const match = normalizedCell.match(regex);
-
-    if (match) {
-      const matchedText = match[0]; // the actual text that matched
-      const desc = nextRow[i-1];
-
-      if (row[i].length > 250) {
-        return null;
+      if (!validDesc) {
+        return null; // match but no valid description
       }
 
-      const formattedDescription = desc.replace(/(\[?[x+~-]?\d+(?:\.\d+)?(?:[+x*/-]\d+)*(?:[%a-zA-Z]+)?\]?)/g, '**$1**');
+      const entryTitle = row[i];
+      const formattedDescription = description.replace(/(\[?[x+~-]?\d+(?:\.\d+)?(?:[+x*/-]\d+)*(?:[%a-zA-Z]+)?\]?)/g, '**$1**'); // Bold text
 
       return {
-        matchedText: row[i], // exact text that matched
+        matchedText: entryTitle, 
         label: row[0] || row[1] || '',
         description: formattedDescription,
         sourceColumn: i,
         foundIn: row
       };
-    } 
+    }
   }
-  return null; //no match
+
+  return null; // no match
 }
 
 
@@ -254,35 +234,20 @@ module.exports = {
 
               // Rank all matching rows by score (shortest matched cell)
               const maxLookahead = category === "Exotic Weapons" ? 3 : 2;
+              const isArtifact = category === "Artifact Perks" || category === "Old Episodic Artifact Perks";
               let match = [];
 
               try {
-                if (category === "Artifact Perks" || category === "Old Episodic Artifact Perks") {
-                  for (let i = 0; i < rows.length - 1; i++) {
-                    match = findMatchAndDescriptionArtifact(rows[i], rows[i+1], query);
-                    if (match !== null) {
-                      break;
-                    }
+                for (let i = 0; i < rows.length; i++) {
+                  let prev = null;
+                  let next = null;
+                  if (i !== 0) { prev = rows[i-1] }
+                  if (i !== rows.length - 1) { next = rows[i+1] }
+                  match = findMatchAndDescription(rows[i], prev, next, query, maxLookahead, isArtifact);
+                  if (match !== null) {
+                    break;
                   }
-                } else {
-                  for (let i = 0; i < rows.length; i++) {
-                    let prev = null;
-                    if (i !== 0) { prev = rows[i-1] }
-                    match = findMatchAndDescription(rows[i], prev, query, maxLookahead);
-                    if (match !== null) {
-                      break;
-                    }
-                  }
-                  /*match = rows
-                    .map(row => findMatchAndDescription(row, query, maxLookahead))
-                    .find(entry => entry !== null);
-                  */
                 }
-                //const output = match
-                //  ? `**${match.matchedText}**\n\n${match.description}`
-                //  : 'No matching entry with a description found.';
-
-                //const splitData = output.split("\n"); // Pretty shit solution ngl
 
                 if (match) {
                   const embed = new EmbedBuilder()
