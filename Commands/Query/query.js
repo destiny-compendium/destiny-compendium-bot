@@ -150,6 +150,7 @@ module.exports = {
                 { name: "Exotic Class", value: "Exotic Class" },
                 { name: "Exotic Weapons", value: "Exotic Weapons" },
                 { name: "Exotic Armor", value: "Exotic Armors" },
+                { name: "Old Episodic Artifact Perks", value: "Old Episodic Artifact Perks" },
         ))
         .addStringOption(option => option.setName("query").setDescription("Query string").setRequired(true)),
 
@@ -249,7 +250,7 @@ module.exports = {
               let match = [];
 
               try {
-                if (category === "Artifact Perks") {
+                if (category === "Artifact Perks" || category === "Old Episodic Artifact Perks") {
                   for (let i = 0; i < rows.length - 1; i++) {
                     match = findMatchAndDescriptionArtifact(rows[i], rows[i+1], query);
                     if (match !== null) {
