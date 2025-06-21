@@ -262,7 +262,7 @@ module.exports = {
                   for (let i = 0; i < rows.length; i++) {
                     let prev = null;
                     if (i !== 0) { prev = rows[i-1] }
-                    match = findMatchAndDescription(row, prev, query, maxLookahead);
+                    match = findMatchAndDescription(rows[i], prev, query, maxLookahead);
                     if (match !== null) {
                       break;
                     }
