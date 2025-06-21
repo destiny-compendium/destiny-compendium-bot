@@ -27,6 +27,8 @@ redisClient.connect()
         process.exit(1); // Can't continue
 });
 
+redisClient.select(process.env.REDISDB);
+
 const client = new Client({
     intents: [ Guilds, GuildMembers, GuildMessages ],
     partials: [ User, Message, GuildMember, ThreadMember ],
