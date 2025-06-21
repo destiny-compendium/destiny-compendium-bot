@@ -73,7 +73,7 @@ function findMatchAndDescription(row, prevRow, query, maxLookahead = 2) {
 
           if (grenadeAspects.includes(row[i])) {
             console.log(row[i]);
-            if (row[i] === "Chaos Accelerant\n(Charged)") {
+            if (row[i].includes("Chaos Accelerant")) {
               return null;
             }
 
