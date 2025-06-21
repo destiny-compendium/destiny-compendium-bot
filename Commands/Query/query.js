@@ -55,6 +55,8 @@ function findMatchAndDescription(row, query, maxLookahead = 2) {
     const normalizedCell = cell.replace(/[' -]/g, '');
 
     const match = normalizedCell.match(regex);
+    console.log(normalizedCell);
+    console.log(match);
 
     if (match) {
       const matchedText = match[0]; // the actual text that matched
