@@ -3,7 +3,7 @@ const { querySheet } = require("../../Util/querySheet");
 const { content } = require("googleapis/build/src/apis/content");
 
 const grenadeAspects = ["Touch of Flame", "Touch of Winter", "Touch of Thunder", "Mindspun Invocation", "Chaos Accelerant (Charged)", "Chaos Accelerant"];
-const ignoreGrenadeList = ["grenade", "grapple", "axion bolt", "void spike", "void wall"];
+const ignoreGrenadeList = ["grenade", "grapple", "axion", "void"];
 
 function formatRowFromArray(row) {
     const label = row[0] || row[1] || '';      // Column A or B
