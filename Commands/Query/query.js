@@ -12,6 +12,10 @@ function escapeRegex(str) {
     return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+function normalizeForFuzzyMatch(str) {
+  return escapeRegex(str).replace(/['\s-]+/g, '.*?');
+}
+
 function getMatchScore(row, query) {
   const regex = new RegExp(`\\b${escapeRegex(query)}`, 'i');
 
@@ -60,7 +64,7 @@ function timeoutEmbed() {
 }
 
 function findMatchAndDescription(row, query, maxLookahead = 2) {
-  const regex = new RegExp(`\\b${escapeRegex(query)}`, 'i');
+  const regex = new RegExp(`\\b${normalizeForFuzzyMatch(query)}`, 'i');
 
   for (let i = 0; i < row.length; i++) {
     const cell = row[i] || '';
@@ -97,7 +101,7 @@ function findMatchAndDescription(row, query, maxLookahead = 2) {
 }
 
 function findMatchAndDescriptionArtifact(row, nextRow, query) {
-  const regex = new RegExp(`\\b${escapeRegex(query)}`, 'i');
+  const regex = new RegExp(`\\b${normalizeForFuzzyMatch(query)}`, 'i');
 
   for (let i = 1; i < row.length; i++) {
     const cell = row[i] || '';
