@@ -8,12 +8,12 @@ function formatRowFromArray(row) {
     return `${label}\n\n${body}`;
 }
 
-function normalizeForFuzzyMatch(str) {
-  return escapeRegex(str).replace(/[' -]/g, '');
-}
-
 function escapeRegex(str) {
   return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function normalizeForFuzzyMatch(str) {
+  return escapeRegex(str).replace(/[' -]/g, '');
 }
 
 function failEmbed() {
@@ -47,11 +47,14 @@ function timeoutEmbed() {
 }
 
 function findMatchAndDescription(row, query, maxLookahead = 2) {
-  const regex = new RegExp(`\\b${normalizeForFuzzyMatch(query)}`, 'i');
+  const cleanQuery = normalizeForFuzzyMatch(query);
+  const regex = new RegExp(`\\b${cleanQuery}`, 'i');
 
   for (let i = 0; i < row.length; i++) {
     const cell = row[i] || '';
-    const match = cell.match(regex);
+    const normalizedCell = cell.replace(/[' -]/g, '');
+
+    const match = normalizedCell.match(regex);
 
     if (match) {
       const matchedText = match[0]; // the actual text that matched
@@ -84,16 +87,19 @@ function findMatchAndDescription(row, query, maxLookahead = 2) {
 }
 
 function findMatchAndDescriptionArtifact(row, nextRow, query) {
-  const regex = new RegExp(`\\b${normalizeForFuzzyMatch(query)}`, 'i');
+  const cleanQuery = normalizeForFuzzyMatch(query);
+  const regex = new RegExp(`\\b${cleanQuery}`, 'i');
 
   for (let i = 1; i < row.length; i++) {
     const cell = row[i] || '';
-    const match = cell.match(regex);
+    const normalizedCell = cell.replace(/[' -]/g, '');
 
     if (nextRow.length === 0) {
       return null;
     }
-  
+
+    const match = normalizedCell.match(regex);
+
     if (match) {
       const matchedText = match[0]; // the actual text that matched
       const desc = nextRow[i-1];
