@@ -276,8 +276,7 @@ module.exports = {
 
               } catch (error) {
                 if (!replied) {
-                  await interaction.editReply({ embeds: [errorEmbed()] });
-                  await interaction.followUp(error);
+                  await interaction.editReply(error);
                   replied = true;
                 }
                 clearTimeout();
