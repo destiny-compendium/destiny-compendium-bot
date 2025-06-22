@@ -187,14 +187,17 @@ module.exports = {
               const value = await client.redis.get(firstMatch);
 
               try {
+                const processTime = Date.now() - interaction.createdTimestamp;
+
                 const embed = new EmbedBuilder()
                     .setColor(0x00FF00)
                     .setTitle(firstMatch)
                     .setAuthor({ name: "Destiny Compendium" })
                     .setDescription(value)
                     .setThumbnail("https://i.imgur.com/iR1JvU5.png")
-                    .setTimestamp();
-
+                    .setTimestamp()
+                    .setFooter({ text: `Queried for '${query}' - Processed in ${processTime} ms` });
+                    
                 interaction.editReply({
                   embeds: [embed],
                   ephemeral: false
@@ -250,13 +253,16 @@ module.exports = {
                 }
 
                 if (match) {
+                  const processTime = Date.now() - interaction.createdTimestamp;
+
                   const embed = new EmbedBuilder()
                       .setColor(0x00FF00)
                       .setTitle(match.matchedText)
                       .setAuthor({ name: "Destiny Compendium" })
                       .setDescription(match.description)
                       .setThumbnail("https://i.imgur.com/iR1JvU5.png")
-                      .setTimestamp();
+                      .setTimestamp()
+                      .setFooter({ text: `Queried for '${query}' - Processed in ${processTime} ms` });
 
                   interaction.editReply({
                     embeds: [embed],
