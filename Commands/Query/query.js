@@ -19,14 +19,15 @@ function normalizeForFuzzyMatch(str) {
   return escapeRegex(str).replace(/[' -]/g, '');
 }
 
-function failEmbed() {
+function failEmbed(query, processTime) {
   return new EmbedBuilder()
 	  .setColor(0xFF0000)
 	  .setTitle("Query Failed")
 	  .setAuthor({ name: "Destiny Compendium" })
     .setDescription("Sorry, but your query matched no results.")
 	  .setThumbnail("https://i.imgur.com/MNab4aw.png")
-	  .setTimestamp();
+	  .setTimestamp()
+    .setFooter({ text: `Queried for '${query}' - Processed in ${processTime} ms` });
 }
 
 function errorEmbed() {
@@ -53,6 +54,9 @@ function findMatchAndDescription(row, prevRow, nextRow, query, maxLookahead, isA
   const cleanQuery = normalizeForFuzzyMatch(query);
   const regex = new RegExp(cleanQuery, 'i');
 
+  const subclassKeywords = ['solar', 'arc', 'void', 'kinetic', 'strand', 'stasis'];
+  const subclassIcons = require("../../Resources/resources.json").icons;
+
   for (let i = 0; i < row.length; i++) {
     const cell = row[i] || '';
     const normalizedCell = cell.replace(/[' -]/g, '');
@@ -60,29 +64,26 @@ function findMatchAndDescription(row, prevRow, nextRow, query, maxLookahead, isA
     const match = normalizedCell.match(regex);
 
     if (match) {
-      const matchedText = match[0]; // the actual text that matched
+      const matchedText = match[0];
       const normalize = str => str.toLowerCase().replace(/['\s-]/g, '');
       let description = "";
       let validDesc = false;
-      
+
       if (isArtifact) {
-        if (nextRow === null || nextRow.length === 0) {
+        if (!nextRow || nextRow.length === 0) {
           return null;
         }
         description = nextRow[i - 1];
         validDesc = true;
       } else {
-        // Try to find a description in the next few cells
         for (let j = 1; j <= maxLookahead; j++) {
           const next = row[i + j];
           if (next && next.trim()) {
-            if (row[i].length > 250) {
-              return null;
-            }
+            if (row[i].length > 250) return null;
 
             if (grenadeAspects.includes(row[i]) || row[i].toLowerCase().includes("handheld")) {
               if (
-                prevRow !== null && 
+                prevRow && 
                 typeof prevRow[i] === 'string' && 
                 ignoreGrenadeList.some(kw => normalize(prevRow[i]).includes(kw))
               ) {
@@ -96,15 +97,25 @@ function findMatchAndDescription(row, prevRow, nextRow, query, maxLookahead, isA
         }
       }
 
-      if (!validDesc) {
-        return null; // match but no valid description
-      }
+      if (!validDesc) return null;
 
       const entryTitle = row[i];
-      const formattedDescription = description.replace(/(\[?[x+~-]?\d+(?:\.\d+)?(?:[+x*/-]\d+)*(?:[%a-zA-Z]+)?\]?)/g, '**$1**'); // Bold text
+      let formattedDescription = description.replace(
+        /(\[?[x+~-]?\d+(?:\.\d+)?(?:[+x*/-]\d+)*(?:[%a-zA-Z]+)?\]?)/g,
+        '**$1**'
+      );
+
+      // Prefix each subclass keyword with its emoji
+      for (const keyword of subclassKeywords) {
+        const emoji = subclassIcons[keyword];
+        if (!emoji) continue;
+
+        const regex = new RegExp(`\\b(${keyword})\\b`, 'gi');
+        formattedDescription = formattedDescription.replace(regex, `${emoji} $1`);
+      }
 
       return {
-        matchedText: entryTitle, 
+        matchedText: entryTitle,
         label: row[0] || row[1] || '',
         description: formattedDescription,
         sourceColumn: i,
@@ -113,9 +124,8 @@ function findMatchAndDescription(row, prevRow, nextRow, query, maxLookahead, isA
     }
   }
 
-  return null; // no match
+  return null;
 }
-
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -273,7 +283,7 @@ module.exports = {
                   await client.redis.set(match.matchedText, match.description); 
                 } else {
                   interaction.editReply({
-                    embeds: [failEmbed()],
+                    embeds: [failEmbed(query, Date.now() - interaction.createdTimestamp)],
                     ephemeral: false
                   });
                 }
