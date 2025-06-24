@@ -2,6 +2,9 @@ const { SlashCommandBuilder, CommandInteraction, PermissionFlagsBits, EmbedBuild
 const { querySheet } = require("../../Util/querySheet");
 const { content } = require("googleapis/build/src/apis/content");
 
+const fs = require('fs');
+const path = require('path');
+
 const grenadeAspects = ["Touch of Flame", "Touch of Winter", "Touch of Thunder", "Mindspun Invocation", "Chaos Accelerant (Charged)", "Chaos Accelerant", "Chaos Accelerant\n(Charged)"];
 const ignoreGrenadeList = ["grenade", "grapple", "axion", "void"];
 
@@ -15,18 +18,24 @@ function escapeRegex(str) {
   return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+function extractImageUrl(cell) {
+  const match = typeof cell === 'string' && cell.match(/=IMAGE\("([^"]+)"\)/i);
+  return match ? match[1] : null;
+}
+
 function normalizeForFuzzyMatch(str) {
   return escapeRegex(str).replace(/[' -]/g, '');
 }
 
-function failEmbed() {
+function failEmbed(query, processTime) {
   return new EmbedBuilder()
 	  .setColor(0xFF0000)
 	  .setTitle("Query Failed")
 	  .setAuthor({ name: "Destiny Compendium" })
     .setDescription("Sorry, but your query matched no results.")
 	  .setThumbnail("https://i.imgur.com/MNab4aw.png")
-	  .setTimestamp();
+	  .setTimestamp()
+    .setFooter({ text: `Queried for '${query}' - Processed in ${processTime} ms` });
 }
 
 function errorEmbed() {
@@ -49,9 +58,12 @@ function timeoutEmbed() {
 	  .setTimestamp();
 }
 
-function findMatchAndDescription(row, prevRow, query, maxLookahead = 2) {
+function findMatchAndDescription(row, prevRow, nextRow, query, maxLookahead, isArtifact) {
   const cleanQuery = normalizeForFuzzyMatch(query);
   const regex = new RegExp(cleanQuery, 'i');
+
+  const subclassKeywords = ['solar', 'arc', 'void', 'kinetic', 'strand', 'stasis'];
+  const subclassIcons = require("../../Resources/resources.json").icons;
 
   for (let i = 0; i < row.length; i++) {
     const cell = row[i] || '';
@@ -60,82 +72,112 @@ function findMatchAndDescription(row, prevRow, query, maxLookahead = 2) {
     const match = normalizedCell.match(regex);
 
     if (match) {
-      const matchedText = match[0]; // the actual text that matched
+      const matchedText = match[0];
       const normalize = str => str.toLowerCase().replace(/['\s-]/g, '');
+      let description = "";
+      let validDesc = false;
+    
+      console.log(`[MATCH] Found match for '${query}' in cell [${i}]: '${row[i]}'`);
+    
+      // image scan
+      let rawImageCell = null;
+      for (let offset = 1; offset < row.length; offset++) {
+        const leftIndex = i - offset;
+        const rightIndex = i + offset;
       
-      // Try to find a description in the next few cells
-      for (let j = 1; j <= maxLookahead; j++) {
-        const next = row[i + j];
-        if (next && next.trim()) {
-          if (row[i].length > 250) {
-            return null;
+        if (leftIndex >= 0) {
+          const left = row[leftIndex];
+          if (left && typeof left === 'string' && (left.includes('=IMAGE(') || left.startsWith('http'))) {
+            rawImageCell = left;
+            console.log(`[IMAGE] Found image to the LEFT at column ${leftIndex}: ${left}`);
+            break;
           }
-
-          if (grenadeAspects.includes(row[i]) || row[i].toLowerCase().includes("handheld")) {
-            if (
-              prevRow !== null && 
-              typeof prevRow[i] === 'string' && 
-              ignoreGrenadeList.some(kw => normalize(prevRow[i]).includes(kw))
-            ) {
-              return null;
-            }
+        }
+      
+        if (rightIndex < row.length) {
+          const right = row[rightIndex];
+          if (right && typeof right === 'string' && (right.includes('=IMAGE(') || right.startsWith('http'))) {
+            rawImageCell = right;
+            console.log(`[IMAGE] Found image to the RIGHT at column ${rightIndex}: ${right}`);
+            break;
           }
-
-          const formattedDescription = next.replace(/(\[?[x+~-]?\d+(?:\.\d+)?(?:[+x*/-]\d+)*(?:[%a-zA-Z]+)?\]?)/g, '**$1**'); // Bold text
-
-          return {
-            matchedText: row[i], 
-            label: row[0] || row[1] || '',
-            description: formattedDescription,
-            sourceColumn: i,
-            foundIn: row
-          };
         }
       }
 
-      return null; // match but no valid description
-    }
-  }
+      if (isArtifact) {
+        if (!nextRow || nextRow.length === 0) return null;
+      
+        const potentialDesc = nextRow[i - 1];
+        if (typeof potentialDesc === 'string' && potentialDesc.toUpperCase().includes('IMAGE')) {
+          console.log(`[DESC] Skipped nextRow[${i - 1}] because it includes IMAGE`);
+          return null;
+        }
+      
+        description = potentialDesc;
+        validDesc = true;
+        console.log(`[DESC] Artifact mode: using nextRow[${i - 1}] as description`);
+      } else {
+        for (let j = 1; j <= maxLookahead; j++) {
+          const next = row[i + j];
+          if (next && next.trim()) {
+            if (next.toUpperCase().includes('IMAGE')) {
+              console.log(`[DESC] Skipped row[${i + j}] as it includes IMAGE`);
+              continue;
+            }
+      
+            if (row[i].length > 250) return null;
+      
+            if (grenadeAspects.includes(row[i]) || row[i].toLowerCase().includes("handheld")) {
+              if (
+                prevRow &&
+                typeof prevRow[i] === 'string' &&
+                ignoreGrenadeList.some(kw => normalize(prevRow[i]).includes(kw))
+              ) {
+                console.log(`[SKIP] Skipping grenade aspect due to blacklist`);
+                return null;
+              }
+            }
+      
+            description = next;
+            validDesc = true;
+            console.log(`[DESC] Using row[${i + j}] as description`);
+            break;
+          }
+        }
+      }      
 
-  return null; // no match
-}
-
-function findMatchAndDescriptionArtifact(row, nextRow, query) {
-  const cleanQuery = normalizeForFuzzyMatch(query);
-  const regex = new RegExp(cleanQuery, 'i');
-
-  for (let i = 1; i < row.length; i++) {
-    const cell = row[i] || '';
-    const normalizedCell = cell.replace(/[' -]/g, '');
-
-    if (nextRow.length === 0) {
-      return null;
-    }
-
-    const match = normalizedCell.match(regex);
-
-    if (match) {
-      const matchedText = match[0]; // the actual text that matched
-      const desc = nextRow[i-1];
-
-      if (row[i].length > 250) {
+      if (!validDesc) {
+        console.log(`[DESC] No valid description found`);
         return null;
       }
 
-      const formattedDescription = desc.replace(/(\[?[x+~-]?\d+(?:\.\d+)?(?:[+x*/-]\d+)*(?:[%a-zA-Z]+)?\]?)/g, '**$1**');
+      const entryTitle = row[i];
+      let formattedDescription = description.replace(
+        /(\[?[x+~-]?\d+(?:\.\d+)?(?:[+x*/-]\d+)*(?:[%a-zA-Z]+)?\]?)/g,
+        '**$1**'
+      );
+
+      for (const keyword of subclassKeywords) {
+        const emoji = subclassIcons[keyword];
+        if (!emoji) continue;
+
+        const regex = new RegExp(`\\b(${keyword})\\b`, 'gi');
+        formattedDescription = formattedDescription.replace(regex, `${emoji} $1`);
+      }
 
       return {
-        matchedText: row[i], // exact text that matched
+        matchedText: entryTitle,
         label: row[0] || row[1] || '',
         description: formattedDescription,
         sourceColumn: i,
-        foundIn: row
+        foundIn: row,
+        rawImageCell
       };
-    } 
+    }
   }
-  return null; //no match
-}
 
+  return null;
+}
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -205,23 +247,42 @@ module.exports = {
             // Eh, it works or something
             if (firstMatch) {
               const value = await client.redis.get(firstMatch);
-
+              const imageBase64 = await client.redis.get(`image.${firstMatch}`);
+            
               try {
+                const processTime = Date.now() - interaction.createdTimestamp;
+            
                 const embed = new EmbedBuilder()
-                    .setColor(0x00FF00)
-                    .setTitle(firstMatch)
-                    .setAuthor({ name: "Destiny Compendium" })
-                    .setDescription(value)
-                    .setThumbnail("https://i.imgur.com/iR1JvU5.png")
-                    .setTimestamp();
-
-                interaction.editReply({
+                  .setColor(0x00FF00)
+                  .setTitle(firstMatch)
+                  .setAuthor({ name: "Destiny Compendium" })
+                  .setDescription(value)
+                  .setTimestamp()
+                  .setFooter({ text: `Queried for '${query}' - Processed in ${processTime} ms` });
+            
+                let files = [];
+            
+                if (imageBase64) {
+                  embed.setThumbnail("attachment://image.png");
+                  files.push({
+                    attachment: Buffer.from(imageBase64.split(',')[1], 'base64'),
+                    name: 'image.png'
+                  });
+                  console.log(`[REDIS] Using cached base64 image for: image.${firstMatch}`);
+                } else {
+                  embed.setThumbnail("https://i.imgur.com/iR1JvU5.png");
+                  console.log(`[REDIS] No image found for: image.${firstMatch}, using fallback.`);
+                }
+            
+                await interaction.editReply({
                   embeds: [embed],
+                  files,
                   ephemeral: false
                 });
+            
                 clearTimeout();
                 replied = true;
-
+            
               } catch (error) {
                 if (!replied) {
                   await interaction.editReply({ embeds: [errorEmbed()] });
@@ -231,17 +292,26 @@ module.exports = {
                 console.error(error);
               }
             } else {
-              const range = category + "!A1:Z";
+              const range = category + "!A1:Z"; // The whole sheet
               const id = client.sheetid;
 
-              const res = await client.sheets.spreadsheets.values.get({
-                  spreadsheetId: id,
-                  range,
-                  majorDimension: "ROWS",
+              const res = await client.sheets.spreadsheets.get({
+                spreadsheetId: id,
+                ranges: [range],
+                includeGridData: true,
+                fields: 'sheets.data.rowData.values(userEnteredValue,effectiveValue,formattedValue)'
               });
-            
-              const values = res.data.values;
-            
+
+              const grid = res.data.sheets?.[0]?.data?.[0]?.rowData || [];
+              
+              const values = grid.map(row =>
+                (row.values || []).map(cell =>
+                  cell?.userEnteredValue?.formulaValue ??
+                  cell?.effectiveValue?.stringValue ??
+                  cell?.formattedValue ?? ''
+                )
+              );
+
               if (!Array.isArray(values) || values.length === 0) {
                   return []; // no data or sheet is empty
               }
@@ -254,55 +324,75 @@ module.exports = {
 
               // Rank all matching rows by score (shortest matched cell)
               const maxLookahead = category === "Exotic Weapons" ? 3 : 2;
+              const isArtifact = (category === "Artifact Perks" || category === "Old Episodic Artifact Perks");
               let match = [];
 
               try {
-                if (category === "Artifact Perks" || category === "Old Episodic Artifact Perks") {
-                  for (let i = 0; i < rows.length - 1; i++) {
-                    match = findMatchAndDescriptionArtifact(rows[i], rows[i+1], query);
-                    if (match !== null) {
-                      break;
-                    }
+                for (let i = 0; i < rows.length; i++) {
+                  let prev = null;
+                  let next = null;
+                  if (i !== 0) { prev = rows[i-1] }
+                  if (i < rows.length - 1) { next = rows[i+1] }
+                  match = findMatchAndDescription(rows[i], prev, next, query, maxLookahead, isArtifact);
+                  if (match !== null) {
+                    break;
                   }
-                } else {
-                  for (let i = 0; i < rows.length; i++) {
-                    let prev = null;
-                    if (i !== 0) { prev = rows[i-1] }
-                    match = findMatchAndDescription(rows[i], prev, query, maxLookahead);
-                    if (match !== null) {
-                      break;
-                    }
-                  }
-                  /*match = rows
-                    .map(row => findMatchAndDescription(row, query, maxLookahead))
-                    .find(entry => entry !== null);
-                  */
                 }
-                //const output = match
-                //  ? `**${match.matchedText}**\n\n${match.description}`
-                //  : 'No matching entry with a description found.';
-
-                //const splitData = output.split("\n"); // Pretty shit solution ngl
 
                 if (match) {
+                  const processTime = Date.now() - interaction.createdTimestamp;
+
+                  let imageBase64 = null;
+                  
+                  if (match.rawImageCell && typeof match.rawImageCell === 'string') {
+                    const imageUrl = extractImageUrl(match.rawImageCell) || (
+                      match.rawImageCell.startsWith("http") ? match.rawImageCell : null
+                    );
+                  
+                    if (imageUrl) {
+                      try {
+                        const axios = require('axios');
+                        const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
+                        const mimeType = response.headers['content-type'];
+                        const base64 = Buffer.from(response.data, 'binary').toString('base64');
+                        imageBase64 = `data:${mimeType};base64,${base64}`;
+                      
+                        await client.redis.set(`image.${match.matchedText}`, imageBase64);
+                      } catch (err) {
+                        console.warn("Image fetch failed:", err.message);
+                      }
+                    }
+                  }
+
                   const embed = new EmbedBuilder()
-                      .setColor(0x00FF00)
-                      .setTitle(match.matchedText)
-                      .setAuthor({ name: "Destiny Compendium" })
-                      .setDescription(match.description)
-                      .setThumbnail("https://i.imgur.com/iR1JvU5.png")
-                      .setTimestamp();
+                    .setColor(0x00FF00)
+                    .setTitle(match.matchedText)
+                    .setAuthor({ name: "Destiny Compendium" })
+                    .setDescription(match.description)
+                    .setTimestamp()
+                    .setFooter({ text: `Queried for '${query}' - Processed in ${processTime} ms` });
+
+                  if (imageBase64) {
+                    embed.setThumbnail("attachment://image.png");
+                  } else {
+                    embed.setThumbnail("https://i.imgur.com/iR1JvU5.png");
+                  }
+
+                  const files = imageBase64 ? [{
+                    attachment: Buffer.from(imageBase64.split(',')[1], 'base64'),
+                    name: 'image.png'
+                  }] : [];
 
                   interaction.editReply({
                     embeds: [embed],
+                    files,
                     ephemeral: false
                   });
-                  
-                  // Store in Redis
-                  await client.redis.set(match.matchedText, match.description); 
+
+                  await client.redis.set(match.matchedText, match.description);
                 } else {
                   interaction.editReply({
-                    embeds: [failEmbed()],
+                    embeds: [failEmbed(query, Date.now() - interaction.createdTimestamp)],
                     ephemeral: false
                   });
                 }

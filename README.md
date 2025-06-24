@@ -20,6 +20,8 @@ Written by **DcruBro** and **zShiso**.
 
 This project is licensed under the Apache 2.0 License.
 
+*External resources are licensed under their corrosponding licenses*
+
 Copyright © 2025, All rights reserved.
 
 [Email DcruBro for any questions](mailto:info@dcrubro.com)
