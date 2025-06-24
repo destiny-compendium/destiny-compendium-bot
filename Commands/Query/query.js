@@ -186,7 +186,7 @@ module.exports = {
         .setDefaultMemberPermissions(PermissionFlagsBits.Everyone)
         .addStringOption(option => option.setName("category").setDescription("Query category").setRequired(true)
             .addChoices(
-                { name: "Weapon/Armor Perks", value: "Weapon/Armor Perks" },
+                { name: "Gear Perks", value: "Gear Perks" },
                 { name: "Weapon Mods", value: "Weapon Mods" },
                 { name: "Artifact Perks", value: "Artifact Perks" },
                 { name: "Armor Mods", value: "Armor Mods" },
