@@ -93,15 +93,27 @@ function findMatchAndDescription(row, prevRow, nextRow, query, maxLookahead, isA
 
       if (isArtifact) {
         if (!nextRow || nextRow.length === 0) return null;
-        description = nextRow[i - 1];
+      
+        const potentialDesc = nextRow[i - 1];
+        if (typeof potentialDesc === 'string' && potentialDesc.toUpperCase().includes('IMAGE')) {
+          console.log(`[DESC] Skipped nextRow[${i - 1}] because it includes IMAGE`);
+          return null;
+        }
+      
+        description = potentialDesc;
         validDesc = true;
         console.log(`[DESC] Artifact mode: using nextRow[${i - 1}] as description`);
       } else {
         for (let j = 1; j <= maxLookahead; j++) {
           const next = row[i + j];
           if (next && next.trim()) {
+            if (next.toUpperCase().includes('IMAGE')) {
+              console.log(`[DESC] Skipped row[${i + j}] as it includes IMAGE`);
+              continue;
+            }
+      
             if (row[i].length > 250) return null;
-
+      
             if (grenadeAspects.includes(row[i]) || row[i].toLowerCase().includes("handheld")) {
               if (
                 prevRow &&
@@ -112,14 +124,14 @@ function findMatchAndDescription(row, prevRow, nextRow, query, maxLookahead, isA
                 return null;
               }
             }
-
+      
             description = next;
             validDesc = true;
             console.log(`[DESC] Using row[${i + j}] as description`);
             break;
           }
         }
-      }
+      }      
 
       if (!validDesc) {
         console.log(`[DESC] No valid description found`);
