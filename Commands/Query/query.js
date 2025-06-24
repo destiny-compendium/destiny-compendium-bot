@@ -79,11 +79,11 @@ function findMatchAndDescription(row, prevRow, nextRow, query, maxLookahead, isA
       // Static image scan
       let rawImageCell = null;
       for (const index of [2, 1, 0]) {
-        const cell = row[index];
+        const cell2 = row[index];
         console.log("[CELL DBG]" + row);
-        if (cell && typeof cell === 'string' && (cell.includes('=IMAGE(') || cell.startsWith('http'))) {
-          rawImageCell = cell;
-          console.log(`[IMAGE] Found image statically at row[${index}]: ${cell}`);
+        if (cell2 && typeof cell2 === 'string' && (cell2.includes('=IMAGE(') || cell2.startsWith('http'))) {
+          rawImageCell = cell2;
+          console.log(`[IMAGE] Found image statically at row[${index}]: ${cell2}`);
           break;
         }
       }
@@ -258,6 +258,7 @@ module.exports = {
                 fields: 'sheets.data.rowData.values.effectiveValue,sheets.data.rowData.values.formattedValue'
               });
               
+              console.log("Bruh 1 " + res);
               const grid = res.data.sheets?.[0]?.data?.[0]?.rowData || [];
               
               const values = grid.map(row =>
@@ -266,8 +267,10 @@ module.exports = {
                   cell?.effectiveValue?.stringValue ??
                   cell?.formattedValue ?? ''
                 )
-              );                          
-            
+              );
+              
+              console.log("Bruh " + values);
+
               if (!Array.isArray(values) || values.length === 0) {
                   return []; // no data or sheet is empty
               }
