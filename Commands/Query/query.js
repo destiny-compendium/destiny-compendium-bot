@@ -79,15 +79,28 @@ function findMatchAndDescription(row, prevRow, nextRow, query, maxLookahead, isA
     
       console.log(`[MATCH] Found match for '${query}' in cell [${i}]: '${row[i]}'`);
     
-      // Static image scan
+      // image scan
       let rawImageCell = null;
-      for (const index of [2, 1, 0]) {
-        const cell2 = row[index];
-        console.log("[CELL DBG]" + row);
-        if (cell2 && typeof cell2 === 'string' && (cell2.includes('=IMAGE(') || cell2.startsWith('http'))) {
-          rawImageCell = cell2;
-          console.log(`[IMAGE] Found image statically at row[${index}]: ${cell2}`);
-          break;
+      for (let offset = 1; offset < row.length; offset++) {
+        const leftIndex = i - offset;
+        const rightIndex = i + offset;
+      
+        if (leftIndex >= 0) {
+          const left = row[leftIndex];
+          if (left && typeof left === 'string' && (left.includes('=IMAGE(') || left.startsWith('http'))) {
+            rawImageCell = left;
+            console.log(`[IMAGE] Found image to the LEFT at column ${leftIndex}: ${left}`);
+            break;
+          }
+        }
+      
+        if (rightIndex < row.length) {
+          const right = row[rightIndex];
+          if (right && typeof right === 'string' && (right.includes('=IMAGE(') || right.startsWith('http'))) {
+            rawImageCell = right;
+            console.log(`[IMAGE] Found image to the RIGHT at column ${rightIndex}: ${right}`);
+            break;
+          }
         }
       }
 
@@ -298,8 +311,6 @@ module.exports = {
                   cell?.formattedValue ?? ''
                 )
               );
-              
-              //console.log("Bruh " + values);
 
               if (!Array.isArray(values) || values.length === 0) {
                   return []; // no data or sheet is empty
