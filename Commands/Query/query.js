@@ -258,7 +258,7 @@ module.exports = {
                 fields: 'sheets.data.rowData.values.effectiveValue,sheets.data.rowData.values.formattedValue'
               });
               
-              console.log("Bruh 1 " + res);
+              console.log("Bruh 1 " + res.data);
               const grid = res.data.sheets?.[0]?.data?.[0]?.rowData || [];
               
               const values = grid.map(row =>
