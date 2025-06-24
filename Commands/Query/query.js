@@ -15,6 +15,11 @@ function escapeRegex(str) {
   return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+function extractImageUrl(cell) {
+  const match = typeof cell === 'string' && cell.match(/=IMAGE\("([^"]+)"\)/i);
+  return match ? match[1] : null;
+}
+
 function normalizeForFuzzyMatch(str) {
   return escapeRegex(str).replace(/[' -]/g, '');
 }
@@ -69,17 +74,18 @@ function findMatchAndDescription(row, prevRow, nextRow, query, maxLookahead, isA
       let description = "";
       let validDesc = false;
 
-      // Look left and right for closest image
+      // 🔍 Look left/right for closest =IMAGE(...) or URL
       let rawImageCell = null;
       for (let offset = 1; offset < row.length; offset++) {
         const left = row[i - offset];
         const right = row[i + offset];
 
-        if (left && typeof left === 'string' && (left.startsWith("http") || left.includes("=IMAGE("))) {
+        if (left && typeof left === 'string' && (left.includes('=IMAGE(') || left.startsWith('http'))) {
           rawImageCell = left;
           break;
         }
-        if (right && typeof right === 'string' && (right.startsWith("http") || right.includes("=IMAGE("))) {
+
+        if (right && typeof right === 'string' && (right.includes('=IMAGE(') || right.startsWith('http'))) {
           rawImageCell = right;
           break;
         }
@@ -283,18 +289,13 @@ module.exports = {
                   let imageBase64 = null;
                   
                   if (match.rawImageCell && typeof match.rawImageCell === 'string') {
-                    let imageUrl = null;
-                  
-                    const imageFormulaMatch = match.rawImageCell.match(/=IMAGE\("([^"]+)"\)/i);
-                    if (imageFormulaMatch) {
-                      imageUrl = imageFormulaMatch[1];
-                    } else if (match.rawImageCell.startsWith("http")) {
-                      imageUrl = match.rawImageCell;
-                    }
+                    const imageUrl = extractImageUrl(match.rawImageCell) || (
+                      match.rawImageCell.startsWith("http") ? match.rawImageCell : null
+                    );
                   
                     if (imageUrl) {
                       try {
-                        const axios = require('axios'); // Ensure axios is installed
+                        const axios = require('axios');
                         const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
                         const mimeType = response.headers['content-type'];
                         const base64 = Buffer.from(response.data, 'binary').toString('base64');
@@ -302,7 +303,7 @@ module.exports = {
                       
                         await client.redis.set(`image.${match.matchedText}`, imageBase64);
                       } catch (err) {
-                        console.warn("Image fetch/store failed:", err.message);
+                        console.warn("Image fetch failed:", err.message);
                       }
                     }
                   }
@@ -332,7 +333,6 @@ module.exports = {
                     ephemeral: false
                   });
 
-                  // Cache description
                   await client.redis.set(match.matchedText, match.description);
                 } else {
                   interaction.editReply({
