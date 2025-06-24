@@ -272,10 +272,6 @@ module.exports = {
                 includeGridData: true,
                 fields: 'sheets.data.rowData.values(userEnteredValue,effectiveValue,formattedValue)'
               });
-              
-              const debugPath = path.join(__dirname, '../../debug-sheet-output.json');
-              fs.writeFileSync(debugPath, JSON.stringify(res.data, null, 2), 'utf8');
-              console.log(`[DEBUG] Wrote raw sheet data to: ${debugPath}`);
 
               const grid = res.data.sheets?.[0]?.data?.[0]?.rowData || [];
               
