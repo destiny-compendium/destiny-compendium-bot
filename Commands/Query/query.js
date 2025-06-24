@@ -78,7 +78,7 @@ function findMatchAndDescription(row, prevRow, nextRow, query, maxLookahead, isA
 
       // 🔍 Look left/right for closest image cell
       let rawImageCell = null;
-      for (let offset = 1; offset < row.length; offset++) {
+      for (let offset = 1; offset <= 3; offset++) {
         const left = row[i - offset];
         const right = row[i + offset];
 
