@@ -58,7 +58,8 @@ module.exports = {
                         `The **Destiny Compendium Bot** is a simple bot for querying the **Destiny Data Compendium**, a big spreadsheet of most Destiny 2 number tests.\nIts data is refreshed 2 days after every weekly reset (it doesn't actively track the spreadsheet).\n
                         Help for the bot is accessible via **/help**\n
                         Written by DcruBro and zShiso\n
-                        This bot is not affiliated with the team behind the Destiny Compendium spreadsheet.`
+                        This bot is not affiliated with the team behind the Destiny Compendium spreadsheet.\n
+                        All info is sourced from [this spreadsheet](https://docs.google.com/spreadsheets/d/1WaxvbLx7UoSZaBqdFr1u32F2uWVLo-CJunJB4nlGUE4/edit?gid=1038486120#gid=1038486120).`
                     )
                     .setThumbnail("https://i.imgur.com/F9KcQzL.png")
                     .setTimestamp();
