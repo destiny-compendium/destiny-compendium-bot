@@ -258,6 +258,7 @@ module.exports = {
                 spreadsheetId: id,
                 ranges: [range],
                 includeGridData: true,
+                fields: 'sheets.data.rowData.values(userEnteredValue,effectiveValue,formattedValue)'
               });
               
               const debugPath = path.join(__dirname, '../../debug-sheet-output.json');
