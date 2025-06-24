@@ -269,7 +269,7 @@ module.exports = {
                 )
               );
               
-              console.log("Bruh " + values);
+              //console.log("Bruh " + values);
 
               if (!Array.isArray(values) || values.length === 0) {
                   return []; // no data or sheet is empty
