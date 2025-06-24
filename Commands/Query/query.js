@@ -115,6 +115,8 @@ function findMatchAndDescription(row, prevRow, nextRow, query, maxLookahead, isA
         formattedDescription = formattedDescription.replace(regex, `${emoji} $1`);
       }
 
+      console.log(rawImageCell);
+
       return {
         matchedText: entryTitle,
         label: row[0] || row[1] || '',
