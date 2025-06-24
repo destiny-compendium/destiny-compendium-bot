@@ -80,6 +80,7 @@ function findMatchAndDescription(row, prevRow, nextRow, query, maxLookahead, isA
       let rawImageCell = null;
       for (const index of [2, 1, 0]) {
         const cell = row[index];
+        console.log(cell);
         if (cell && typeof cell === 'string' && (cell.includes('=IMAGE(') || cell.startsWith('http'))) {
           rawImageCell = cell;
           console.log(`[IMAGE] Found image statically at row[${index}]: ${cell}`);
