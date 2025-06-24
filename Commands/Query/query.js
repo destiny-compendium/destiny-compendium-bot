@@ -69,10 +69,11 @@ function findMatchAndDescription(row, prevRow, nextRow, query, maxLookahead, isA
       let description = "";
       let validDesc = false;
 
+      // image value (raw)
+      let rawImageCell = row[i + 1] || null;
+
       if (isArtifact) {
-        if (!nextRow || nextRow.length === 0) {
-          return null;
-        }
+        if (!nextRow || nextRow.length === 0) return null;
         description = nextRow[i - 1];
         validDesc = true;
       } else {
@@ -83,13 +84,14 @@ function findMatchAndDescription(row, prevRow, nextRow, query, maxLookahead, isA
 
             if (grenadeAspects.includes(row[i]) || row[i].toLowerCase().includes("handheld")) {
               if (
-                prevRow && 
-                typeof prevRow[i] === 'string' && 
+                prevRow &&
+                typeof prevRow[i] === 'string' &&
                 ignoreGrenadeList.some(kw => normalize(prevRow[i]).includes(kw))
               ) {
                 return null;
               }
             }
+
             description = next;
             validDesc = true;
             break;
@@ -105,7 +107,6 @@ function findMatchAndDescription(row, prevRow, nextRow, query, maxLookahead, isA
         '**$1**'
       );
 
-      // Prefix each subclass keyword with its emoji
       for (const keyword of subclassKeywords) {
         const emoji = subclassIcons[keyword];
         if (!emoji) continue;
@@ -119,7 +120,8 @@ function findMatchAndDescription(row, prevRow, nextRow, query, maxLookahead, isA
         label: row[0] || row[1] || '',
         description: formattedDescription,
         sourceColumn: i,
-        foundIn: row
+        foundIn: row,
+        rawImageCell
       };
     }
   }
@@ -265,22 +267,60 @@ module.exports = {
                 if (match) {
                   const processTime = Date.now() - interaction.createdTimestamp;
 
+                  let imageBase64 = null;
+                  
+                  if (match.rawImageCell && typeof match.rawImageCell === 'string') {
+                    let imageUrl = null;
+                  
+                    const imageFormulaMatch = match.rawImageCell.match(/=IMAGE\("([^"]+)"\)/i);
+                    if (imageFormulaMatch) {
+                      imageUrl = imageFormulaMatch[1];
+                    } else if (match.rawImageCell.startsWith("http")) {
+                      imageUrl = match.rawImageCell;
+                    }
+                  
+                    if (imageUrl) {
+                      try {
+                        const axios = require('axios'); // Ensure axios is installed
+                        const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
+                        const mimeType = response.headers['content-type'];
+                        const base64 = Buffer.from(response.data, 'binary').toString('base64');
+                        imageBase64 = `data:${mimeType};base64,${base64}`;
+                      
+                        await client.redis.set(`image.${match.matchedText}`, imageBase64);
+                      } catch (err) {
+                        console.warn("Image fetch/store failed:", err.message);
+                      }
+                    }
+                  }
+
                   const embed = new EmbedBuilder()
-                      .setColor(0x00FF00)
-                      .setTitle(match.matchedText)
-                      .setAuthor({ name: "Destiny Compendium" })
-                      .setDescription(match.description)
-                      .setThumbnail("https://i.imgur.com/iR1JvU5.png")
-                      .setTimestamp()
-                      .setFooter({ text: `Queried for '${query}' - Processed in ${processTime} ms` });
+                    .setColor(0x00FF00)
+                    .setTitle(match.matchedText)
+                    .setAuthor({ name: "Destiny Compendium" })
+                    .setDescription(match.description)
+                    .setTimestamp()
+                    .setFooter({ text: `Queried for '${query}' - Processed in ${processTime} ms` });
+
+                  if (imageBase64) {
+                    embed.setThumbnail("attachment://image.png");
+                  } else {
+                    embed.setThumbnail("https://i.imgur.com/iR1JvU5.png");
+                  }
+
+                  const files = imageBase64 ? [{
+                    attachment: Buffer.from(imageBase64.split(',')[1], 'base64'),
+                    name: 'image.png'
+                  }] : [];
 
                   interaction.editReply({
                     embeds: [embed],
+                    files,
                     ephemeral: false
                   });
-                  
-                  // Store in Redis
-                  await client.redis.set(match.matchedText, match.description); 
+
+                  // Cache description
+                  await client.redis.set(match.matchedText, match.description);
                 } else {
                   interaction.editReply({
                     embeds: [failEmbed(query, Date.now() - interaction.createdTimestamp)],
