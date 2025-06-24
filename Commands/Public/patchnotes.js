@@ -39,6 +39,11 @@ function timeoutEmbed() {
 
 // Patch data
 const patchData = {
+  "1.1.0": {
+    date: "25/06/2025",
+    description:
+      "This version adds multiple features.\nIt now shows the **icon of the entry** from the spreadsheet, and will **fallback to the previous one** if not found or valid.\n\nAs an addition, any mentions of elemental names are now accompanied by their respective icons.",
+  },
   "1.0.3": {
     date: "21/06/2025",
     description:
