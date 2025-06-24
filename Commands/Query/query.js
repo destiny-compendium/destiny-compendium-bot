@@ -73,24 +73,16 @@ function findMatchAndDescription(row, prevRow, nextRow, query, maxLookahead, isA
       const normalize = str => str.toLowerCase().replace(/['\s-]/g, '');
       let description = "";
       let validDesc = false;
-
+    
       console.log(`[MATCH] Found match for '${query}' in cell [${i}]: '${row[i]}'`);
-
-      // 🔍 Look left/right for closest image cell
+    
+      // Static image scan
       let rawImageCell = null;
-      for (let offset = 1; offset <= 3; offset++) {
-        const left = row[i - offset];
-        const right = row[i + offset];
-
-        if (left && typeof left === 'string' && (left.includes('=IMAGE(') || left.startsWith('http'))) {
-          rawImageCell = left;
-          console.log(`[IMAGE] Found image to the LEFT at offset ${offset}: ${left}`);
-          break;
-        }
-
-        if (right && typeof right === 'string' && (right.includes('=IMAGE(') || right.startsWith('http'))) {
-          rawImageCell = right;
-          console.log(`[IMAGE] Found image to the RIGHT at offset ${offset}: ${right}`);
+      for (const index of [2, 1, 0]) {
+        const cell = row[index];
+        if (cell && typeof cell === 'string' && (cell.includes('=IMAGE(') || cell.startsWith('http'))) {
+          rawImageCell = cell;
+          console.log(`[IMAGE] Found image statically at row[${index}]: ${cell}`);
           break;
         }
       }
