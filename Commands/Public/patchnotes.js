@@ -122,7 +122,24 @@ module.exports = {
           .setThumbnail("https://i.imgur.com/F9KcQzL.png")
           .setTimestamp();
 
-        await selectInt.update({ embeds: [selectedEmbed] });
+          const updatedMenu = new StringSelectMenuBuilder()
+          .setCustomId("select_patch_version")
+          .setPlaceholder("Choose a patch version")
+          .addOptions(
+            versions.map((ver) => ({
+              label: `Version ${ver}`,
+              description: `Released on ${patchData[ver].date}`,
+              value: ver,
+              default: ver === selected, // <-- highlight the selected version
+            }))
+          );
+        
+        const updatedRow = new ActionRowBuilder().addComponents(updatedMenu);
+        
+        await selectInt.update({
+          embeds: [selectedEmbed],
+          components: [updatedRow],
+        });        
       });
 
       collector.on("end", async () => {
