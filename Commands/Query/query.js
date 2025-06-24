@@ -248,7 +248,7 @@ module.exports = {
                 console.error(error);
               }
             } else {
-              const range = category + "!A1:Z";
+              const range = category + "!A1:Z500";
               const id = client.sheetid;
 
               const res = await client.sheets.spreadsheets.get({
