@@ -74,7 +74,9 @@ function findMatchAndDescription(row, prevRow, nextRow, query, maxLookahead, isA
       let description = "";
       let validDesc = false;
 
-      // 🔍 Look left/right for closest =IMAGE(...) or URL
+      console.log(`[MATCH] Found match for '${query}' in cell [${i}]: '${row[i]}'`);
+
+      // 🔍 Look left/right for closest image cell
       let rawImageCell = null;
       for (let offset = 1; offset < row.length; offset++) {
         const left = row[i - offset];
@@ -82,11 +84,13 @@ function findMatchAndDescription(row, prevRow, nextRow, query, maxLookahead, isA
 
         if (left && typeof left === 'string' && (left.includes('=IMAGE(') || left.startsWith('http'))) {
           rawImageCell = left;
+          console.log(`[IMAGE] Found image to the LEFT at offset ${offset}: ${left}`);
           break;
         }
 
         if (right && typeof right === 'string' && (right.includes('=IMAGE(') || right.startsWith('http'))) {
           rawImageCell = right;
+          console.log(`[IMAGE] Found image to the RIGHT at offset ${offset}: ${right}`);
           break;
         }
       }
@@ -95,6 +99,7 @@ function findMatchAndDescription(row, prevRow, nextRow, query, maxLookahead, isA
         if (!nextRow || nextRow.length === 0) return null;
         description = nextRow[i - 1];
         validDesc = true;
+        console.log(`[DESC] Artifact mode: using nextRow[${i - 1}] as description`);
       } else {
         for (let j = 1; j <= maxLookahead; j++) {
           const next = row[i + j];
@@ -107,18 +112,23 @@ function findMatchAndDescription(row, prevRow, nextRow, query, maxLookahead, isA
                 typeof prevRow[i] === 'string' &&
                 ignoreGrenadeList.some(kw => normalize(prevRow[i]).includes(kw))
               ) {
+                console.log(`[SKIP] Skipping grenade aspect due to blacklist`);
                 return null;
               }
             }
 
             description = next;
             validDesc = true;
+            console.log(`[DESC] Using row[${i + j}] as description`);
             break;
           }
         }
       }
 
-      if (!validDesc) return null;
+      if (!validDesc) {
+        console.log(`[DESC] No valid description found`);
+        return null;
+      }
 
       const entryTitle = row[i];
       let formattedDescription = description.replace(
