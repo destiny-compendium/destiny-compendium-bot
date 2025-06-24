@@ -37,7 +37,7 @@ function timeoutEmbed() {
     .setTimestamp();
 }
 
-// Example patch notes
+// Patch data
 const patchData = {
   "1.0.3": {
     date: "21/06/2025",
@@ -57,9 +57,8 @@ module.exports = {
     .setDescription("Display patch notes")
     .setDefaultMemberPermissions(PermissionFlagsBits.Everyone),
 
-  async execute(interaction, client) {
+  async execute(interaction) {
     await interaction.deferReply();
-
     let replied = false;
 
     const timeout = setTimeout(async () => {
@@ -70,29 +69,37 @@ module.exports = {
     }, 10000);
 
     try {
-      const versionOptions = Object.keys(patchData).map((ver) => ({
-        label: `Version ${ver}`,
-        description: `Released on ${patchData[ver].date}`,
-        value: ver,
-      }));
+      // Sort patch versions (semver-aware)
+      const versions = Object.keys(patchData).sort((a, b) =>
+        a.localeCompare(b, undefined, { numeric: true, sensitivity: "base" })
+      );
+      const latestVersion = versions[versions.length - 1];
+      const latestPatch = patchData[latestVersion];
+
+      const embed = new EmbedBuilder()
+        .setColor(0x0000ff)
+        .setTitle(`Patch Notes - Version ${latestVersion}`)
+        .setAuthor({ name: "Destiny Compendium" })
+        .setDescription(`**${latestPatch.date}**\n\n${latestPatch.description}`)
+        .setThumbnail("https://i.imgur.com/F9KcQzL.png")
+        .setTimestamp();
 
       const selectMenu = new StringSelectMenuBuilder()
         .setCustomId("select_patch_version")
         .setPlaceholder("Choose a patch version")
-        .addOptions(versionOptions);
+        .addOptions(
+          versions.map((ver) => ({
+            label: `Version ${ver}`,
+            description: `Released on ${patchData[ver].date}`,
+            value: ver,
+            default: ver === latestVersion, // Highlight latest
+          }))
+        );
 
       const row = new ActionRowBuilder().addComponents(selectMenu);
 
-      const initialEmbed = new EmbedBuilder()
-        .setColor(0x0000ff)
-        .setTitle("Patch Notes")
-        .setAuthor({ name: "Destiny Compendium" })
-        .setDescription("Select a patch version from the menu below.")
-        .setThumbnail("https://i.imgur.com/F9KcQzL.png")
-        .setTimestamp();
-
       await interaction.editReply({
-        embeds: [initialEmbed],
+        embeds: [embed],
         components: [row],
         ephemeral: false,
       });
@@ -107,7 +114,7 @@ module.exports = {
         const selected = selectInt.values[0];
         const patch = patchData[selected];
 
-        const embed = new EmbedBuilder()
+        const selectedEmbed = new EmbedBuilder()
           .setColor(0x0000ff)
           .setTitle(`Patch Notes - Version ${selected}`)
           .setAuthor({ name: "Destiny Compendium" })
@@ -115,13 +122,12 @@ module.exports = {
           .setThumbnail("https://i.imgur.com/F9KcQzL.png")
           .setTimestamp();
 
-        await selectInt.update({ embeds: [embed] });
+        await selectInt.update({ embeds: [selectedEmbed] });
       });
 
       collector.on("end", async () => {
         if (!replied) {
           replied = true;
-          // Disable dropdown after timeout
           const disabledRow = new ActionRowBuilder().addComponents(
             selectMenu.setDisabled(true)
           );
