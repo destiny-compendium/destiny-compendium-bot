@@ -251,13 +251,21 @@ module.exports = {
               const range = category + "!A1:Z";
               const id = client.sheetid;
 
-              const res = await client.sheets.spreadsheets.values.get({
-                  spreadsheetId: id,
-                  range,
-                  majorDimension: "ROWS",
+              const res = await client.sheets.spreadsheets.get({
+                spreadsheetId: id,
+                ranges: [range],
+                includeGridData: true,
+                fields: 'sheets.data.rowData.values.effectiveValue,sheets.data.rowData.values.formattedValue'
               });
-            
-              const values = res.data.values;
+              
+              const grid = res.data.sheets?.[0]?.data?.[0]?.rowData || [];
+              
+              const values = grid.map(row =>
+                (row.values || []).map(cell =>
+                  // Use formula (stringValue), or fallback to rendered value
+                  cell?.effectiveValue?.stringValue ?? cell?.formattedValue ?? ''
+                )
+              );              
             
               if (!Array.isArray(values) || values.length === 0) {
                   return []; // no data or sheet is empty
