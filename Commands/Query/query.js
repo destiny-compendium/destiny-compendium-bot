@@ -262,10 +262,11 @@ module.exports = {
               
               const values = grid.map(row =>
                 (row.values || []).map(cell =>
-                  // Use formula (stringValue), or fallback to rendered value
-                  cell?.effectiveValue?.stringValue ?? cell?.formattedValue ?? ''
+                  cell?.userEnteredValue?.formulaValue ??
+                  cell?.effectiveValue?.stringValue ??
+                  cell?.formattedValue ?? ''
                 )
-              );              
+              );                          
             
               if (!Array.isArray(values) || values.length === 0) {
                   return []; // no data or sheet is empty
