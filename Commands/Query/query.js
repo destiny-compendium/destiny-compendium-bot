@@ -263,7 +263,7 @@ module.exports = {
                 console.error(error);
               }
             } else {
-              const range = category; // The whole sheet
+              const range = category + "!A1:Z"; // The whole sheet
               const id = client.sheetid;
 
               const res = await client.sheets.spreadsheets.get({
