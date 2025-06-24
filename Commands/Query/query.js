@@ -2,6 +2,9 @@ const { SlashCommandBuilder, CommandInteraction, PermissionFlagsBits, EmbedBuild
 const { querySheet } = require("../../Util/querySheet");
 const { content } = require("googleapis/build/src/apis/content");
 
+const fs = require('fs');
+const path = require('path');
+
 const grenadeAspects = ["Touch of Flame", "Touch of Winter", "Touch of Thunder", "Mindspun Invocation", "Chaos Accelerant (Charged)", "Chaos Accelerant", "Chaos Accelerant\n(Charged)"];
 const ignoreGrenadeList = ["grenade", "grapple", "axion", "void"];
 
@@ -258,7 +261,10 @@ module.exports = {
                 fields: 'sheets.data.rowData.values.effectiveValue,sheets.data.rowData.values.formattedValue'
               });
               
-              console.log("Bruh 1 " + res.data);
+              const debugPath = path.join(__dirname, '../../debug-sheet-output.json');
+              fs.writeFileSync(debugPath, JSON.stringify(res.data, null, 2), 'utf8');
+              console.log(`[DEBUG] Wrote raw sheet data to: ${debugPath}`);
+
               const grid = res.data.sheets?.[0]?.data?.[0]?.rowData || [];
               
               const values = grid.map(row =>
