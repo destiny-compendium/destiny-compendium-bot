@@ -251,14 +251,13 @@ module.exports = {
                 console.error(error);
               }
             } else {
-              const range = category + "!A1:Z500";
+              const range = category; // The whole sheet
               const id = client.sheetid;
 
               const res = await client.sheets.spreadsheets.get({
                 spreadsheetId: id,
                 ranges: [range],
                 includeGridData: true,
-                fields: 'sheets.data.rowData.values.effectiveValue,sheets.data.rowData.values.formattedValue'
               });
               
               const debugPath = path.join(__dirname, '../../debug-sheet-output.json');
