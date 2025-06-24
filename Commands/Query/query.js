@@ -69,8 +69,21 @@ function findMatchAndDescription(row, prevRow, nextRow, query, maxLookahead, isA
       let description = "";
       let validDesc = false;
 
-      // image value (raw)
-      let rawImageCell = row[i + 1] || null;
+      // Look left and right for closest image
+      let rawImageCell = null;
+      for (let offset = 1; offset < row.length; offset++) {
+        const left = row[i - offset];
+        const right = row[i + offset];
+
+        if (left && typeof left === 'string' && (left.startsWith("http") || left.includes("=IMAGE("))) {
+          rawImageCell = left;
+          break;
+        }
+        if (right && typeof right === 'string' && (right.startsWith("http") || right.includes("=IMAGE("))) {
+          rawImageCell = right;
+          break;
+        }
+      }
 
       if (isArtifact) {
         if (!nextRow || nextRow.length === 0) return null;
@@ -114,8 +127,6 @@ function findMatchAndDescription(row, prevRow, nextRow, query, maxLookahead, isA
         const regex = new RegExp(`\\b(${keyword})\\b`, 'gi');
         formattedDescription = formattedDescription.replace(regex, `${emoji} $1`);
       }
-
-      console.log(rawImageCell);
 
       return {
         matchedText: entryTitle,
