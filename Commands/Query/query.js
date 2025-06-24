@@ -234,26 +234,42 @@ module.exports = {
             // Eh, it works or something
             if (firstMatch) {
               const value = await client.redis.get(firstMatch);
-
+              const imageBase64 = await client.redis.get(`image.${firstMatch}`);
+            
               try {
                 const processTime = Date.now() - interaction.createdTimestamp;
-
+            
                 const embed = new EmbedBuilder()
-                    .setColor(0x00FF00)
-                    .setTitle(firstMatch)
-                    .setAuthor({ name: "Destiny Compendium" })
-                    .setDescription(value)
-                    .setThumbnail("https://i.imgur.com/iR1JvU5.png")
-                    .setTimestamp()
-                    .setFooter({ text: `Queried for '${query}' - Processed in ${processTime} ms` });
-                    
-                interaction.editReply({
+                  .setColor(0x00FF00)
+                  .setTitle(firstMatch)
+                  .setAuthor({ name: "Destiny Compendium" })
+                  .setDescription(value)
+                  .setTimestamp()
+                  .setFooter({ text: `Queried for '${query}' - Processed in ${processTime} ms` });
+            
+                let files = [];
+            
+                if (imageBase64) {
+                  embed.setThumbnail("attachment://image.png");
+                  files.push({
+                    attachment: Buffer.from(imageBase64.split(',')[1], 'base64'),
+                    name: 'image.png'
+                  });
+                  console.log(`[REDIS] Using cached base64 image for: image.${firstMatch}`);
+                } else {
+                  embed.setThumbnail("https://i.imgur.com/iR1JvU5.png");
+                  console.log(`[REDIS] No image found for: image.${firstMatch}, using fallback.`);
+                }
+            
+                await interaction.editReply({
                   embeds: [embed],
+                  files,
                   ephemeral: false
                 });
+            
                 clearTimeout();
                 replied = true;
-
+            
               } catch (error) {
                 if (!replied) {
                   await interaction.editReply({ embeds: [errorEmbed()] });
