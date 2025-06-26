@@ -43,7 +43,7 @@ function errorEmbed() {
 	  .setColor(0xFF0000)
 	  .setTitle("An Error Occurred")
 	  .setAuthor({ name: "Destiny Compendium" })
-    .setDescription("Sorry, but an internal error occurred during your query. **Try being more specifc with your query.**")
+    .setDescription("Sorry, but an internal error occurred during your query.")
 	  .setThumbnail("https://i.imgur.com/MNab4aw.png")
 	  .setTimestamp();
 }
@@ -246,6 +246,10 @@ module.exports = {
 
             // Eh, it works or something
             if (firstMatch) {
+              if (firstMatch.startsWith("image.")) {
+                firstMatch = firstMatch.replace("image.", ""); // Dirty fix for the bug that happens when fetching a cached entry for "Willbreaker Munitions".
+              }
+
               const value = await client.redis.get(firstMatch);
               const imageBase64 = await client.redis.get(`image.${firstMatch}`);
             
@@ -260,15 +264,10 @@ module.exports = {
                   .setTimestamp()
                   .setFooter({ text: `Queried for '${query}' - Processed in ${processTime} ms` });
             
-                let files = [];
-            
                 if (imageBase64) {
-                  embed.setThumbnail("attachment://image.png");
-                  files.push({
-                    attachment: Buffer.from(imageBase64.split(',')[1], 'base64'),
-                    name: 'image.png'
-                  });
-                  console.log(`[REDIS] Using cached base64 image for: image.${firstMatch}`);
+                  // This is not actually base64, I'm just lazy and don't want to refactor
+                  embed.setThumbnail(imageBase64);
+                  console.log(`[REDIS] Using cached image for: image.${firstMatch}`);
                 } else {
                   embed.setThumbnail("https://i.imgur.com/iR1JvU5.png");
                   console.log(`[REDIS] No image found for: image.${firstMatch}, using fallback.`);
@@ -276,7 +275,6 @@ module.exports = {
             
                 await interaction.editReply({
                   embeds: [embed],
-                  files,
                   ephemeral: false
                 });
             
@@ -351,15 +349,16 @@ module.exports = {
                   
                     if (imageUrl) {
                       try {
-                        const axios = require('axios');
-                        const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
-                        const mimeType = response.headers['content-type'];
-                        const base64 = Buffer.from(response.data, 'binary').toString('base64');
-                        imageBase64 = `data:${mimeType};base64,${base64}`;
-                      
-                        await client.redis.set(`image.${match.matchedText}`, imageBase64);
+                        //const axios = require('axios');
+                        //const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
+                        //const mimeType = response.headers['content-type'];
+                        //const base64 = Buffer.from(response.data, 'binary').toString('base64');
+                        //imageBase64 = `data:${mimeType};base64,${base64}`;
+                        
+                        imageBase64 = imageUrl;
+                        await client.redis.set(`image.${match.matchedText}`, imageUrl);
                       } catch (err) {
-                        console.warn("Image fetch failed:", err.message);
+                        console.warn("Image store failed:", err.message);
                       }
                     }
                   }
@@ -373,19 +372,13 @@ module.exports = {
                     .setFooter({ text: `Queried for '${query}' - Processed in ${processTime} ms` });
 
                   if (imageBase64) {
-                    embed.setThumbnail("attachment://image.png");
+                    embed.setThumbnail(imageBase64);
                   } else {
                     embed.setThumbnail("https://i.imgur.com/iR1JvU5.png");
                   }
 
-                  const files = imageBase64 ? [{
-                    attachment: Buffer.from(imageBase64.split(',')[1], 'base64'),
-                    name: 'image.png'
-                  }] : [];
-
                   interaction.editReply({
                     embeds: [embed],
-                    files,
                     ephemeral: false
                   });
 

@@ -39,6 +39,11 @@ function timeoutEmbed() {
 
 // Patch data
 const patchData = {
+  "1.1.1": {
+    date: "26/06/2025",
+    description:
+      "This version fixes a bug **where some cached entries would error out or display bugged data**.\n\nIt also adds a new command **/support** which displays how you can **contact us about any bugs, suggestions, etc.**",
+  },
   "1.1.0": {
     date: "25/06/2025",
     description:
