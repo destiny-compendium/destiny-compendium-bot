@@ -263,12 +263,9 @@ module.exports = {
                 let files = [];
             
                 if (imageBase64) {
-                  embed.setThumbnail("attachment://image.png");
-                  files.push({
-                    attachment: Buffer.from(imageBase64.split(',')[1], 'base64'),
-                    name: 'image.png'
-                  });
-                  console.log(`[REDIS] Using cached base64 image for: image.${firstMatch}`);
+                  // This is not actually base64, I'm just lazy and don't want to refactor
+                  embed.setThumbnail(imageBase64);
+                  console.log(`[REDIS] Using cached image for: image.${firstMatch}`);
                 } else {
                   embed.setThumbnail("https://i.imgur.com/iR1JvU5.png");
                   console.log(`[REDIS] No image found for: image.${firstMatch}, using fallback.`);
@@ -351,15 +348,15 @@ module.exports = {
                   
                     if (imageUrl) {
                       try {
-                        const axios = require('axios');
-                        const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
-                        const mimeType = response.headers['content-type'];
-                        const base64 = Buffer.from(response.data, 'binary').toString('base64');
-                        imageBase64 = `data:${mimeType};base64,${base64}`;
+                        //const axios = require('axios');
+                        //const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
+                        //const mimeType = response.headers['content-type'];
+                        //const base64 = Buffer.from(response.data, 'binary').toString('base64');
+                        //imageBase64 = `data:${mimeType};base64,${base64}`;
                       
-                        await client.redis.set(`image.${match.matchedText}`, imageBase64);
+                        await client.redis.set(`image.${match.matchedText}`, imageUrl);
                       } catch (err) {
-                        console.warn("Image fetch failed:", err.message);
+                        console.warn("Image store failed:", err.message);
                       }
                     }
                   }
