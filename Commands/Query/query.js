@@ -246,6 +246,7 @@ module.exports = {
 
             // Eh, it works or something
             if (firstMatch) {
+              console.log(firstMatch);
               const value = await client.redis.get(firstMatch);
               console.log(value);
               const imageBase64 = await client.redis.get(`image.${firstMatch}`);
