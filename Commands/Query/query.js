@@ -43,7 +43,7 @@ function errorEmbed() {
 	  .setColor(0xFF0000)
 	  .setTitle("An Error Occurred")
 	  .setAuthor({ name: "Destiny Compendium" })
-    .setDescription("Sorry, but an internal error occurred during your query. **Try being more specifc with your query.**")
+    .setDescription("Sorry, but an internal error occurred during your query.")
 	  .setThumbnail("https://i.imgur.com/MNab4aw.png")
 	  .setTimestamp();
 }
@@ -246,17 +246,12 @@ module.exports = {
 
             // Eh, it works or something
             if (firstMatch) {
-              console.log(firstMatch);
               if (firstMatch.startsWith("image.")) {
                 firstMatch = firstMatch.replace("image.", ""); // Dirty fix for the bug that happens when fetching a cached entry for "Willbreaker Munitions".
               }
 
-              console.log(firstMatch);
-
               const value = await client.redis.get(firstMatch);
-              console.log(value);
               const imageBase64 = await client.redis.get(`image.${firstMatch}`);
-              console.log(imageBase64);
             
               try {
                 const processTime = Date.now() - interaction.createdTimestamp;
@@ -361,7 +356,6 @@ module.exports = {
                         //imageBase64 = `data:${mimeType};base64,${base64}`;
                         
                         imageBase64 = imageUrl;
-                        console.log(imageBase64, imageUrl);
                         await client.redis.set(`image.${match.matchedText}`, imageUrl);
                       } catch (err) {
                         console.warn("Image store failed:", err.message);
