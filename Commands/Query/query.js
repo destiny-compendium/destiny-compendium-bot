@@ -247,7 +247,9 @@ module.exports = {
             // Eh, it works or something
             if (firstMatch) {
               const value = await client.redis.get(firstMatch);
+              console.log(value);
               const imageBase64 = await client.redis.get(`image.${firstMatch}`);
+              console.log(imageBase64);
             
               try {
                 const processTime = Date.now() - interaction.createdTimestamp;
