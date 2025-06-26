@@ -260,8 +260,6 @@ module.exports = {
                   .setTimestamp()
                   .setFooter({ text: `Queried for '${query}' - Processed in ${processTime} ms` });
             
-                let files = [];
-            
                 if (imageBase64) {
                   // This is not actually base64, I'm just lazy and don't want to refactor
                   embed.setThumbnail(imageBase64);
@@ -273,7 +271,6 @@ module.exports = {
             
                 await interaction.editReply({
                   embeds: [embed],
-                  files,
                   ephemeral: false
                 });
             
@@ -377,14 +374,8 @@ module.exports = {
                     embed.setThumbnail("https://i.imgur.com/iR1JvU5.png");
                   }
 
-                  const files = imageBase64 ? [{
-                    attachment: Buffer.from(imageBase64.split(',')[1], 'base64'),
-                    name: 'image.png'
-                  }] : [];
-
                   interaction.editReply({
                     embeds: [embed],
-                    files,
                     ephemeral: false
                   });
 
