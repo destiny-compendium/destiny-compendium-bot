@@ -353,7 +353,8 @@ module.exports = {
                         //const mimeType = response.headers['content-type'];
                         //const base64 = Buffer.from(response.data, 'binary').toString('base64');
                         //imageBase64 = `data:${mimeType};base64,${base64}`;
-                      
+                        
+                        imageBase64 = imageUrl;
                         await client.redis.set(`image.${match.matchedText}`, imageUrl);
                       } catch (err) {
                         console.warn("Image store failed:", err.message);
@@ -370,7 +371,7 @@ module.exports = {
                     .setFooter({ text: `Queried for '${query}' - Processed in ${processTime} ms` });
 
                   if (imageBase64) {
-                    embed.setThumbnail("attachment://image.png");
+                    embed.setThumbnail(imageBase64);
                   } else {
                     embed.setThumbnail("https://i.imgur.com/iR1JvU5.png");
                   }
