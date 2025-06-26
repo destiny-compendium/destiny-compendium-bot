@@ -246,9 +246,12 @@ module.exports = {
 
             // Eh, it works or something
             if (firstMatch) {
+              console.log(firstMatch);
               if (firstMatch.startsWith("image.")) {
-                firstMatch.replace("image.", ""); // Dirty fix for the bug that happens when fetching a cached entry for "Willbreaker Munitions".
+                firstMatch = firstMatch.replace("image.", ""); // Dirty fix for the bug that happens when fetching a cached entry for "Willbreaker Munitions".
               }
+
+              console.log(firstMatch);
 
               const value = await client.redis.get(firstMatch);
               console.log(value);
