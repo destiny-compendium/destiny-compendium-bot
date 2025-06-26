@@ -355,6 +355,7 @@ module.exports = {
                         //imageBase64 = `data:${mimeType};base64,${base64}`;
                         
                         imageBase64 = imageUrl;
+                        console.log(imageBase64, imageUrl);
                         await client.redis.set(`image.${match.matchedText}`, imageUrl);
                       } catch (err) {
                         console.warn("Image store failed:", err.message);
