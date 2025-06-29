@@ -110,8 +110,7 @@ module.exports = {
                 interaction.editReply({ embeds: [waitEmbed], ephmeral: false });
                 return;
               });
-            }
-
+            } else {
             try {
               const processTime = Date.now() - interaction.createdTimestamp;
               let embed;
@@ -192,6 +191,7 @@ module.exports = {
               }
               clearTimeout();
               console.error(error);
+            }
             }
 
             return;
