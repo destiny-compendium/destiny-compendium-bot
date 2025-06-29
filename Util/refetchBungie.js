@@ -260,3 +260,5 @@ async function refetchBungie(token) {
 
   return await buildFeaturedSummary();
 }
+
+module.exports = refetchBungie;

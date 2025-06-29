@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, CommandInteraction, PermissionFlagsBits, EmbedBuilder } = require("discord.js");
-const { refetchBungie } = require("../../Util/refetchBungie");
+const refetchBungie = require("../../Util/refetchBungie");
 const globals = require("../../Util/globals");
 
 function errorEmbed() {
