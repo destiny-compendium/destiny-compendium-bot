@@ -22,6 +22,19 @@ function timeoutEmbed() {
 	  .setTimestamp();
 }
 
+// This is here because I'm a nut for formatting
+const reverseCategory = {
+  "Raid": "Raids",
+  "Dungeon": "Dungeons",
+  "Story": "Exotic",
+  "Nightfall": "Nightfall",
+  "Vanguard Op": "Vanguard",
+  "The Crucible": "Crucible",
+  "Trials of Osiris": "Trials of Osiris",
+  "Seasonal Arena": "Seasonal Arena",
+  "Gambit": "Gambit"
+};
+
 module.exports = {
     data: new SlashCommandBuilder()
         .setName("rotation")
@@ -121,7 +134,7 @@ module.exports = {
 
               embed = new EmbedBuilder()
                 .setColor(0x00FF00)
-	              .setTitle(category)
+	              .setTitle(reverseCategory[category])
 	              .setAuthor({ name: "Destiny Compendium" })
 	              .setThumbnail("https://i.imgur.com/iR1JvU5.png")
 	              .setTimestamp()
