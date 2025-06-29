@@ -234,6 +234,7 @@ module.exports = {
               	.setTimestamp();
 
               interaction.editReply({ embeds: [epicoembedico], ephemeral: false });
+              replied = true;
               return;
             }
 
