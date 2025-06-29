@@ -56,7 +56,7 @@ module.exports = {
                     .setAuthor({ name: "Destiny Compendium" })
                     .setDescription(
                         `**/query <category> <query>**\nQueries the Destiny Compendium spreadsheet for your desired **query** in the selected **category**.\n
-                        **/rotation <category>**\nQueries the Destiny 2 API to get the current rotation for the specified category.\n
+                        **/rotation <category>**\nQueries the Destiny 2 API to get the current featured activity rotation for the specified category.\n
                         **/help**\nDisplay this menu.\n
                         **/info**\nDisplay bot info\n
                         **/patchnotes**\nBot patch notes\n
