@@ -13,21 +13,23 @@ async function fetchInventoryItem(hash, API_KEY) {
 }
 
 async function scrapeNightfallInfo(milestoneId, API_KEY) {
+    console.log("Scraping " + milestoneId);
+
   const res = await axios.get('https://www.todayindestiny.com/');
   const $ = cheerio.load(res.data);
 
   const milestoneIdStr = milestoneId.toString();
 
-  // 🔍 Match ANY div whose id contains the milestoneId
+  // Match ANY div whose id contains the milestoneId
   const container = $(`div[id*="${milestoneIdStr}"]`).closest('.eventCardContainer').first();
   if (!container || container.length === 0) {
     return { nightfallName: null, weapons: [] };
   }
 
-  // 🏷️ Extract Nightfall name
+  // Extract Nightfall name
   const nightfallName = container.find('.eventCardHeaderName').first()?.text()?.trim() || null;
 
-  // 🎯 Locate Rotating Rewards section
+  // Locate Rotating Rewards section
   const rewardSection = container.find('.eventCardDatabaseItemsContainer')
   .filter((_, el) => $(el).find('p.sectionHeader').text().includes('Rotating Rewards'))
   .first();
