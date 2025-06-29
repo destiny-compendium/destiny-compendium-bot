@@ -37,6 +37,6 @@ class Globals {
 }
 
 const globals = new Globals();
-Object.freeze(globals);
+//Object.freeze(globals);
 
 module.exports = globals;
