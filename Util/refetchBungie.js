@@ -4,59 +4,50 @@ const cheerio = require("cheerio");
 
 const API_BASE = 'https://www.bungie.net';
 
-async function getManifestInventoryItems(API_KEY) {
-  const manifestRes = await fetch(`${API_BASE}/Platform/Destiny2/Manifest/`, {
+async function fetchInventoryItem(hash, API_KEY) {
+  const url = `${API_BASE}/Platform/Destiny2/Manifest/DestinyInventoryItemDefinition/${hash}`;
+  const response = await axios.get(url, {
     headers: { 'X-API-Key': API_KEY }
   });
-  const manifest = await manifestRes.json();
-  const inventoryPath = manifest.Response.jsonWorldComponentContentPaths.en.DestinyInventoryItemDefinition;
-  const inventoryRes = await fetch(`${API_BASE}${inventoryPath}`);
-  return inventoryRes.json();
+  return response.data.Response;
 }
 
-async function scrapeNightfallInfo(milestoneId, API) {
-  const url = 'https://www.todayindestiny.com/';
-  const { data: html } = await axios.get(url);
-  const $ = cheerio.load(html);
+async function scrapeNightfallInfo(milestoneId, API_KEY) {
+  const res = await axios.get('https://www.todayindestiny.com/');
+  const $ = cheerio.load(res.data);
 
   const milestoneIdStr = milestoneId.toString();
 
+  const headerDiv = $(`div[id^="milestone_${milestoneIdStr}"]`).first();
+  const contentId = headerDiv.attr('id');
+
   let nightfallName = null;
-  const itemHashes = [];
+  const weapons = [];
 
-  // Locate the header container by matching data-target attribute
-  const headerDiv = $('.eventCardHeaderContainer').filter((_, el) => {
-    return $(el).attr('data-target')?.includes(milestoneIdStr);
-  }).first();
+  if (contentId) {
+    // Nightfall name
+    nightfallName = headerDiv.find('.eventCardHeaderName').first().text().trim();
 
-  if (headerDiv.length) {
-    nightfallName = headerDiv.find('.eventCardHeaderName').text().trim();
-  }
+    // Rotating Rewards section
+    const contentDiv = $(`#${contentId}_content`);
+    const itemContainers = contentDiv.find('.manifest_item_container[id^="manifest_InventoryItem_"]');
 
-  // Locate the content container by matching ID
-  const contentDiv = $(`.eventCardContentContainer[id*="${milestoneIdStr}"]`);
+    for (const el of itemContainers.toArray()) {
+      const idMatch = $(el).attr('id')?.match(/manifest_InventoryItem_(\d+)/);
+      if (!idMatch) continue;
 
-  if (contentDiv.length) {
-    contentDiv.find('.manifest_item_container[id^="manifest_InventoryItem_"]').each((_, el) => {
-      const idAttr = $(el).attr('id');
-      const match = idAttr.match(/manifest_InventoryItem_(\d+)/);
-      if (match) {
-        itemHashes.push(parseInt(match[1], 10));
+      const hash = parseInt(idMatch[1], 10);
+      const item = await fetchInventoryItem(hash, API_KEY);
+
+      if (item?.itemType === 3) { // Weapon
+        weapons.push({
+          name: item.displayProperties?.name,
+          type: item.itemTypeDisplayName,
+          hash: item.hash
+        });
       }
-    });
+    }
   }
-
-  // Load manifest to resolve weapon names
-  const inventoryItems = await getManifestInventoryItems(API);
-
-  const weapons = itemHashes
-    .map(hash => inventoryItems[hash])
-    .filter(item => item?.itemType === 3) // itemType 3 = weapons
-    .map(item => ({
-      name: item.displayProperties?.name,
-      type: item.itemTypeDisplayName,
-      hash: item.hash
-    }));
 
   return {
     nightfallName,
