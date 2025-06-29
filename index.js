@@ -39,9 +39,14 @@ client.config = require("./config.json");
 client.sheets = sheets;
 client.sheetid = "1WaxvbLx7UoSZaBqdFr1u32F2uWVLo-CJunJB4nlGUE4"; // This is the ID for the google sheet
 client.redis = redisClient;
+client.bungietoken = process.env.BUNGIEAUTH;
 
-client.login(process.env.TOKEN).then(() => {
-    //client.application.commands.set([]); // Unregister commands to prevernt orphaned commands
-    loadEvents(client);
-    loadCommands(client);
-});
+async function main() {
+    client.login(process.env.TOKEN).then(() => {
+        //client.application.commands.set([]); // Unregister commands to prevernt orphaned commands
+        loadEvents(client);
+        loadCommands(client);
+    });
+}
+
+main();

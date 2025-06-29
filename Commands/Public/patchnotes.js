@@ -39,6 +39,11 @@ function timeoutEmbed() {
 
 // Patch data
 const patchData = {
+  "1.2.0": {
+    date: "29/06/2025",
+    description:
+      "This version adds a new command, **/rotation**.\nThis command allows you to get the **current featured activites** (the current *rotation*) in Destiny 2, for your specified category.\n\nFor info on how to use it, you can do **/help** for the description, or just simply use it via **/rotation**.",
+  },
   "1.1.1": {
     date: "26/06/2025",
     description:
