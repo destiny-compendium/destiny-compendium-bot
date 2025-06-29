@@ -15,55 +15,53 @@ async function fetchInventoryItem(hash, API_KEY) {
 async function scrapeNightfallInfo(milestoneId, API_KEY) {
     console.log("Scraping " + milestoneId);
 
-  const res = await axios.get('https://www.todayindestiny.com/');
-  const $ = cheerio.load(res.data);
-
-  console.log($.html());
-
-  const milestoneIdStr = milestoneId.toString();
-
-  // Match ANY div whose id contains the milestoneId
-  const container = $(`div[id*="${milestoneIdStr}"]`).closest('.eventCardContainer').first();
-  if (!container || container.length === 0) {
-    return { nightfallName: null, weapons: [] };
-  }
-
-  // Extract Nightfall name
-  const nightfallName = container.find('.eventCardHeaderName').first()?.text()?.trim() || null;
-
-  // Locate Rotating Rewards section
-  const rewardSection = container.find('.eventCardDatabaseItemsContainer')
-  .filter((_, el) => $(el).find('p.sectionHeader').text().includes('Rotating Rewards'))
-  .first();
-
-  const itemEls = rewardSection.find('.manifest_item_container[id^="manifest_InventoryItem_"]');
-  const weapons = [];
-
-  for (const el of itemEls.toArray()) {
-    const match = $(el).attr('id')?.match(/manifest_InventoryItem_(\d+)/);
-    if (!match) continue;
-
-    const hash = parseInt(match[1], 10);
-    try {
-      const item = await fetchInventoryItem(hash, API_KEY);
-      if (item?.itemType === 3) {
-        weapons.push({
-          name: item.displayProperties?.name,
-          type: item.itemTypeDisplayName,
-          hash: item.hash
-        });
-      }
-    } catch (err) {
-      console.warn(`Failed to fetch item ${hash}: ${err.message}`);
+    const res = await axios.get('https://www.todayindestiny.com/');
+    const $ = cheerio.load(res.data);
+  
+    const milestoneIdStr = milestoneId.toString();
+  
+    // 🔍 Match ANY div whose id contains the milestoneId
+    const container = $(`div[id*="${milestoneIdStr}"]`).closest('.eventCardContainer').first();
+    if (!container || container.length === 0) {
+      return { nightfallName: null, weapons: [] };
     }
-  }
-
-  console.log(nightfallName, weapons);
-
-  return {
-    nightfallName,
-    weapons
-  };
+  
+    // 🏷️ Extract Nightfall name
+    const nightfallName = container.find('.eventCardHeaderName').first()?.text()?.trim() || null;
+  
+    // 🎯 Locate Rotating Rewards section
+    const rewardSection = container.find('.eventCardDatabaseItemsContainer')
+    .filter((_, el) => $(el).find('p.sectionHeader').text().includes('Rotating Rewards'))
+    .first();
+  
+    const itemEls = rewardSection.find('.manifest_item_container[id^="manifest_InventoryItem_"]');
+    const weapons = [];
+  
+    for (const el of itemEls.toArray()) {
+      const match = $(el).attr('id')?.match(/manifest_InventoryItem_(\d+)/);
+      if (!match) continue;
+  
+      const hash = parseInt(match[1], 10);
+      try {
+        const item = await fetchInventoryItem(hash);
+        if (item?.itemType === 3) {
+          weapons.push({
+            name: item.displayProperties?.name,
+            type: item.itemTypeDisplayName,
+            hash: item.hash
+          });
+        }
+      } catch (err) {
+        console.warn(`Failed to fetch item ${hash}: ${err.message}`);
+      }
+    }
+  
+    console.log(nightfallName, weapons);
+  
+    return {
+      nightfallName,
+      weapons
+    };
 }
 
 async function refetchBungie(token) {
