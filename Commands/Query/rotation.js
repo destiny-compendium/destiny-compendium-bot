@@ -131,7 +131,7 @@ module.exports = {
               if (category === "Nightfall") {
                 let desc = `Current Nightfall: **${globals.getBManifest().nightfallData.nightfallName}**\nCurrent Rewards: **`;
                 for (let i = 0; i < globals.getBManifest().nightfallData.weapons.length; i++) {
-                  let mod = globals.getBManifest().nightfallData.weapons[i];
+                  let mod = globals.getBManifest().nightfallData.weapons[i].name;
                   if (!mod.includes("Unknown")) {
                     desc += mod;
                     if (j < (globals.getBManifest().nightfallData.weapons.length - 1)) {
