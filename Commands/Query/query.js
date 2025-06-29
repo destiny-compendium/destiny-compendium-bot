@@ -38,12 +38,12 @@ function failEmbed(query, processTime) {
     .setFooter({ text: `Queried for '${query}' - Processed in ${processTime} ms` });
 }
 
-function errorEmbed() {
+function errorEmbed(unspec = false) {
   return new EmbedBuilder()
 	  .setColor(0xFF0000)
 	  .setTitle("An Error Occurred")
 	  .setAuthor({ name: "Destiny Compendium" })
-    .setDescription("Sorry, but an internal error occurred during your query.")
+    .setDescription(unspec ? "You need to specify a query." : "Sorry, but an internal error occurred during your query.")
 	  .setThumbnail("https://i.imgur.com/MNab4aw.png")
 	  .setTimestamp();
 }
@@ -207,11 +207,6 @@ module.exports = {
             const category = interaction.options.getString("category");
             const query = interaction.options.getString("query");
 
-            if (query === "" || query === null || query === undefined) {
-                interaction.reply({ content: "You need to specify a query.", ephermal: true });
-                return;
-            }
-
             await interaction.deferReply();
 
             let replied = false;
@@ -223,6 +218,24 @@ module.exports = {
                 replied = true;
               }
             }, 10000); // 60,000 ms = 60 seconds
+            
+            if (query === "" || query === null || query === undefined) {
+              interaction.editReply({ embeds: [errorEmbed(true)], ephermal: false });
+              return;
+            }
+            
+            if (query === "dn") {
+              const epicoembedico = EmbedBuilder()
+              	.setColor(0xFF0000)
+              	.setTitle("haha funny")
+              	.setAuthor({ name: "Destiny Compendium" })
+                .setDescription("Deez Nuts or something")
+              	.setThumbnail("https://i.imgur.com/wzVs8Xq.png")
+              	.setTimestamp();
+
+              interaction.editReply({ embeds: [epicoembedico], ephemeral: false });
+              return;
+            }
 
             // Attempt to first query the local cache
             let cursor = "0";

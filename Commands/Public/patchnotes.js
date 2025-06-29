@@ -39,6 +39,11 @@ function timeoutEmbed() {
 
 // Patch data
 const patchData = {
+  "1.2.0": {
+    date: "29/06/2025",
+    description:
+      "placeholder",
+  },
   "1.1.1": {
     date: "26/06/2025",
     description:
