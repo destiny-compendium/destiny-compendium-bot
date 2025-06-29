@@ -108,6 +108,8 @@ module.exports = {
 	                .setTimestamp();
               
                 interaction.editReply({ embeds: [waitEmbed], ephmeral: false });
+
+                globals.setBManifestLock(false);
                 return;
               });
             } else {
