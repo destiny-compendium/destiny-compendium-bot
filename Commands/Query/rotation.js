@@ -95,10 +95,9 @@ module.exports = {
             // Re-fetch only if last fetch was before last weekly reset
             if ((!lastFetch || lastFetch < lastReset) && !globals.getBManifestLock()) {
               globals.setBManifestLock(true);
-              refetchBungie(client.bungietoken).then(data => {
-                globals.setLastBungieFetch(now.toISOString());
-                globals.setBManifest(data);
-              });
+              const data = await refetchBungie(client.bungietoken);
+              globals.setLastBungieFetch(now.toISOString());
+              globals.setBManifest(data);
             }
 
             try {
