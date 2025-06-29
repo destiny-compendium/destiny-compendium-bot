@@ -139,7 +139,7 @@ module.exports = {
                     }
                   }
                 }
-                embed.setDescription(desc + "**");
+                embed.setDescription(desc + "**\n");
               }
 
               const d = globals.getBManifest()[category];
@@ -172,6 +172,8 @@ module.exports = {
                   } else {
                     modifiers += " -";
                   }
+
+                  modifiers += "\n";
 
                   embed.addFields({ name: name, value: modifiers });
 

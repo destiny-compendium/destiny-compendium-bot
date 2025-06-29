@@ -28,13 +28,15 @@ async function scrapeNightfallInfo(milestoneId, API_KEY) {
   if (contentId) {
     // Nightfall name
     nightfallName = headerDiv.find('.eventCardHeaderName').first().text().trim();
+    console.log("nf name: " + nightfallName);
 
     // Rotating Rewards section
     const contentDiv = $(`#${contentId}_content`);
     const itemContainers = contentDiv.find('.manifest_item_container[id^="manifest_InventoryItem_"]');
 
+    console.log(itemContainers);
+
     for (const el of itemContainers.toArray()) {
-        console.log(el);
       const idMatch = $(el).attr('id')?.match(/manifest_InventoryItem_(\d+)/);
       if (!idMatch) continue;
 
