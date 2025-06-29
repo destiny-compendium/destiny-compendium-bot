@@ -18,6 +18,8 @@ async function scrapeNightfallInfo(milestoneId, API_KEY) {
   const res = await axios.get('https://www.todayindestiny.com/');
   const $ = cheerio.load(res.data);
 
+  console.log(res);
+
   const milestoneIdStr = milestoneId.toString();
 
   // Match ANY div whose id contains the milestoneId
