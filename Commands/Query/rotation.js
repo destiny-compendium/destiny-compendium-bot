@@ -22,6 +22,19 @@ function timeoutEmbed() {
 	  .setTimestamp();
 }
 
+// This is here because I'm a nut for formatting
+const reverseCategory = {
+  "Raid": "Raids",
+  "Dungeon": "Dungeons",
+  "Story": "Exotic",
+  "Nightfall": "Nightfall",
+  "Vanguard Op": "Vanguard",
+  "The Crucible": "Crucible",
+  "Trials of Osiris": "Trials of Osiris",
+  "Seasonal Arena": "Seasonal Arena",
+  "Gambit": "Gambit"
+};
+
 module.exports = {
     data: new SlashCommandBuilder()
         .setName("rotation")
@@ -42,13 +55,6 @@ module.exports = {
 
         async execute(interaction, client) {
             const category = interaction.options.getString("category");
-
-            let catName = category;
-            for (const option of interaction.options.data) {
-              if (option.value === category) {
-                catName = option.name;
-              }
-            }
 
             await interaction.deferReply();
 
@@ -128,7 +134,7 @@ module.exports = {
 
               embed = new EmbedBuilder()
                 .setColor(0x00FF00)
-	              .setTitle(catName)
+	              .setTitle(reverseCategory[category])
 	              .setAuthor({ name: "Destiny Compendium" })
 	              .setThumbnail("https://i.imgur.com/iR1JvU5.png")
 	              .setTimestamp()
