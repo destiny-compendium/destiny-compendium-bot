@@ -54,6 +54,8 @@ async function scrapeNightfallInfo(milestoneId, API_KEY) {
     }
   }
 
+  console.log(nightfallName, weapons);
+
   return {
     nightfallName,
     weapons
