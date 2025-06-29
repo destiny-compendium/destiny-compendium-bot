@@ -95,9 +95,21 @@ module.exports = {
             // Re-fetch only if last fetch was before last weekly reset
             if ((!lastFetch || lastFetch < lastReset) && !globals.getBManifestLock()) {
               globals.setBManifestLock(true);
-              const data = await refetchBungie(client.bungietoken);
-              globals.setLastBungieFetch(now.toISOString());
-              globals.setBManifest(data);
+              refetchBungie(client.bungietoken).then(data => {
+                globals.setLastBungieFetch(now.toISOString());
+                globals.setBManifest(data);
+
+                const waitEmbed = new EmbedBuilder()
+                  .setColor(0xFF0000)
+	                .setTitle("Data Refreshing")
+	                .setAuthor({ name: "Destiny Compendium" })
+                  .setDescription("Sorry, but the rotation data is currently refreshing. Please try again in a couple seconds.")
+	                .setThumbnail("https://i.imgur.com/MNab4aw.png")
+	                .setTimestamp();
+              
+                interaction.editReply({ embeds: [waitEmbed], ephmeral: false });
+                return;
+              });
             }
 
             try {
