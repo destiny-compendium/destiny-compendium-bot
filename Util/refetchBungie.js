@@ -43,7 +43,7 @@ async function scrapeNightfallInfo(milestoneId, API_KEY) {
   
       const hash = parseInt(match[1], 10);
       try {
-        const item = await fetchInventoryItem(hash);
+        const item = await fetchInventoryItem(hash, API_KEY);
         if (item?.itemType === 3) {
           weapons.push({
             name: item.displayProperties?.name,
