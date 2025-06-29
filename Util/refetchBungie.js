@@ -167,7 +167,7 @@ async function refetchBungie(token) {
           continue;
         }
 
-        if (lowerType === "nightfall") {
+        if (lowerType === "nightfall" && nightfallId === null) {
           nightfallId = hash;
         }
 

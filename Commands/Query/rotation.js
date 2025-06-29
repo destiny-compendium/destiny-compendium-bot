@@ -65,6 +65,8 @@ module.exports = {
 	              .setTimestamp();
               
               interaction.editReply({ embeds: [waitEmbed], ephmeral: false });
+              replied = true;
+
               return;
             }
 
@@ -108,6 +110,7 @@ module.exports = {
 	                .setTimestamp();
               
                 interaction.editReply({ embeds: [waitEmbed], ephmeral: false });
+                replied = true;
 
                 globals.setBManifestLock(false);
                 return;
