@@ -128,7 +128,7 @@ module.exports = {
                 .setFooter({ text: `Processed in ${processTime} ms` });
 
               if (category === "Nightfall") {
-                let desc = `Current Nightfall: **${globals.getBManifest().nightfallData.nightfallName}**\nCurrent Rewards: **`;
+                let desc = `**Current Nightfall:** ${globals.getBManifest().nightfallData.nightfallName}\n**Current Rewards:** `;
                 for (let i = 0; i < globals.getBManifest().nightfallData.weapons.length; i++) {
                   let mod = globals.getBManifest().nightfallData.weapons[i].name;
                   if (!mod.includes("Unknown")) {
@@ -138,14 +138,14 @@ module.exports = {
                     }
                   }
                 }
-                embed.setDescription(desc + "**\n");
+                embed.setDescription(desc + "\n\n");
               }
 
               const d = globals.getBManifest()[category];
               if (d && d.length > 0) {
                 for (let i = 0; i < d.length; i++) {
                   let name = d[i].name;
-                  let modifiers = "Modifiers: ";
+                  let modifiers = "**Modifiers:** ";
                   for (let j = 0; j < d[i].modifiers.length; j++) {
                     let mod = d[i].modifiers[j];
                     if (!mod.includes("Unknown")) {
@@ -156,7 +156,7 @@ module.exports = {
                     }
                   }
 
-                  modifiers += "\n\nSpecific rewards: ";
+                  modifiers += "\n\n**Specific rewards:** ";
                   if (d[i].rewards.length > 0) {
                     for (let j = 0; j < d[i].rewards.length; j++) {
                       let mod = d[i].rewards[j];
