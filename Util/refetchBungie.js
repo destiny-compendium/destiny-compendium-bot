@@ -14,7 +14,7 @@ async function getManifestInventoryItems(API_KEY) {
 }
 
 async function scrapeNightfallInfo(milestoneId, API) {
-  const browser = await puppeteer.launch({ headless: 'new' });
+  const browser = await puppeteer.launch({ executablePath: "/usr/bin/chromium-browser", headless: true });
   const page = await browser.newPage();
   await page.goto('https://www.todayindestiny.com/', { waitUntil: 'domcontentloaded' });
 
