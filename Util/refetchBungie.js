@@ -14,7 +14,7 @@ async function getManifestInventoryItems(API_KEY) {
 }
 
 async function scrapeNightfallInfo(milestoneId, API) {
-  const browser = await puppeteer.launch({ executablePath: "/usr/bin/chromium-browser", headless: true, args: [
+  const browser = await puppeteer.launch({ headless: true, args: [
     '--no-sandbox',
     '--disable-setuid-sandbox',
     '--disable-dev-shm-usage',
