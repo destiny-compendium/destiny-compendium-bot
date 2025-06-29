@@ -17,11 +17,13 @@ async function scrapeNightfallInfo(milestoneId, API) {
   const browser = await puppeteer.launch({ headless: "new", args: [
     '--no-sandbox',
     '--disable-setuid-sandbox',
-    '--disable-gpu',
     '--disable-dev-shm-usage',
-    '--single-process',
-    '--no-zygote'
-  ], timeout: 60000, dumpio: true });
+    '--disable-gpu',
+    '--disable-accelerated-2d-canvas',
+    '--no-first-run',
+    '--no-zygote',
+    '--single-process'
+  ], dumpio: true });
   const page = await browser.newPage();
   await page.goto('https://www.todayindestiny.com/', { waitUntil: 'domcontentloaded' });
 
