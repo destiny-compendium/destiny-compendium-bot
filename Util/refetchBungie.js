@@ -1,5 +1,6 @@
 const fs = require("fs");
-const puppeteer = require('puppeteer');
+const axios = require("axios");
+const cheerio = require("cheerio");
 
 const API_BASE = 'https://www.bungie.net';
 
@@ -14,61 +15,48 @@ async function getManifestInventoryItems(API_KEY) {
 }
 
 async function scrapeNightfallInfo(milestoneId, API) {
-  const browser = await puppeteer.launch({ headless: "new", args: [
-    '--no-sandbox',
-    '--disable-setuid-sandbox',
-    '--disable-dev-shm-usage',
-    '--disable-gpu',
-    '--disable-accelerated-2d-canvas',
-    '--no-first-run',
-    '--no-zygote',
-    '--single-process'
-  ], dumpio: true });
-  const page = await browser.newPage();
-  await page.goto('https://www.todayindestiny.com/', { waitUntil: 'domcontentloaded' });
+  const url = 'https://www.todayindestiny.com/';
+  const { data: html } = await axios.get(url);
+  const $ = cheerio.load(html);
 
-  const { nightfallName, itemHashes } = await page.evaluate((milestoneId) => {
-    const result = {
-      nightfallName: null,
-      itemHashes: []
-    };
+  const milestoneIdStr = milestoneId.toString();
 
-    const rootDiv = Array.from(document.querySelectorAll('.eventCardHeaderContainer'))
-    .find(div => div.getAttribute('data-target')?.includes(milestoneId.toString()));
+  let nightfallName = null;
+  const itemHashes = [];
 
-    if (rootDiv) {
-      const nameEl = rootDiv.querySelector('.eventCardHeaderName');
-      result.nightfallName = nameEl?.textContent.trim() || null;
-    }
+  // Locate the header container by matching data-target attribute
+  const headerDiv = $('.eventCardHeaderContainer').filter((_, el) => {
+    return $(el).attr('data-target')?.includes(milestoneIdStr);
+  }).first();
 
-    const contentDiv = Array.from(document.querySelectorAll('.eventCardContentContainer'))
-    .find(div => div.id?.includes(milestoneId.toString()));
+  if (headerDiv.length) {
+    nightfallName = headerDiv.find('.eventCardHeaderName').text().trim();
+  }
 
-    if (contentDiv) {
-      const itemDivs = contentDiv.querySelectorAll('.manifest_item_container[id^="manifest_InventoryItem_"]');
-      result.itemHashes = Array.from(itemDivs)
-      .map(div => {
-        const match = div.id.match(/manifest_InventoryItem_(\d+)/);
-        return match ? parseInt(match[1], 10) : null;
-      })
-      .filter(Boolean);
-    }
+  // Locate the content container by matching ID
+  const contentDiv = $(`.eventCardContentContainer[id*="${milestoneIdStr}"]`);
 
-    return result;
-  }, milestoneId);
+  if (contentDiv.length) {
+    contentDiv.find('.manifest_item_container[id^="manifest_InventoryItem_"]').each((_, el) => {
+      const idAttr = $(el).attr('id');
+      const match = idAttr.match(/manifest_InventoryItem_(\d+)/);
+      if (match) {
+        itemHashes.push(parseInt(match[1], 10));
+      }
+    });
+  }
 
-  await browser.close();
-
+  // Load manifest to resolve weapon names
   const inventoryItems = await getManifestInventoryItems(API);
 
   const weapons = itemHashes
-  .map(hash => inventoryItems[hash])
-  .filter(item => item?.itemType === 3) // weapons only
-  .map(item => ({
-    name: item.displayProperties?.name,
-    type: item.itemTypeDisplayName,
-    hash: item.hash
-  }));
+    .map(hash => inventoryItems[hash])
+    .filter(item => item?.itemType === 3) // itemType 3 = weapons
+    .map(item => ({
+      name: item.displayProperties?.name,
+      type: item.itemTypeDisplayName,
+      hash: item.hash
+    }));
 
   return {
     nightfallName,
