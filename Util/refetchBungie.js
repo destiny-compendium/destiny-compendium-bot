@@ -13,6 +13,7 @@ async function fetchInventoryItem(hash, API_KEY) {
 }
 
 async function scrapeNightfallInfo(milestoneId, API_KEY) {
+    console.log("attempting scrape for " + milestoneId);
   const res = await axios.get('https://www.todayindestiny.com/');
   const $ = cheerio.load(res.data);
 
@@ -33,11 +34,14 @@ async function scrapeNightfallInfo(milestoneId, API_KEY) {
     const itemContainers = contentDiv.find('.manifest_item_container[id^="manifest_InventoryItem_"]');
 
     for (const el of itemContainers.toArray()) {
+        console.log(el);
       const idMatch = $(el).attr('id')?.match(/manifest_InventoryItem_(\d+)/);
       if (!idMatch) continue;
 
       const hash = parseInt(idMatch[1], 10);
       const item = await fetchInventoryItem(hash, API_KEY);
+
+      console.log(`item: ${item}`);
 
       if (item?.itemType === 3) { // Weapon
         weapons.push({

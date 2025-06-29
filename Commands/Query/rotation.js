@@ -131,10 +131,9 @@ module.exports = {
                   let mod = globals.getBManifest().nightfallData.weapons[i];
                   if (!mod.includes("Unknown")) {
                     desc += mod;
-                  }
-
-                  if (j < (globals.getBManifest().nightfallData.weapons.length - 1)) {
-                    desc += ", ";
+                    if (j < (globals.getBManifest().nightfallData.weapons.length - 1)) {
+                      desc += ", ";
+                    }
                   }
                 }
                 embed.setDescription(desc + "**");
@@ -149,14 +148,13 @@ module.exports = {
                     let mod = d[i].modifiers[j];
                     if (!mod.includes("Unknown")) {
                       modifiers += mod;
-                    }
-
-                    if (j < (d[i].modifiers.length - 1)) {
-                      modifiers += ", ";
+                      if (j < (d[i].modifiers.length - 1)) {
+                        modifiers += ", ";
+                      }
                     }
                   }
 
-                  modifiers += "\nSpecific rewards: ";
+                  modifiers += "\n\nSpecific rewards: ";
                   if (d[i].rewards.length > 0) {
                     for (let j = 0; j < d[i].rewards.length; j++) {
                       let mod = d[i].rewards[j];
@@ -174,9 +172,9 @@ module.exports = {
 
                   embed.addFields({ name: name, value: modifiers });
 
-                  if (i < (d.length - 1)) {
+                  /*if (i < (d.length - 1)) {
                     embed.addFields({ name: "\u200B", value: "\u200B" });
-                  }
+                  }*/
                 }
               }
               
