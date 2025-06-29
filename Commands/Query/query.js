@@ -225,7 +225,7 @@ module.exports = {
             }
             
             if (query === "dn") {
-              const epicoembedico = EmbedBuilder()
+              const epicoembedico = new EmbedBuilder()
               	.setColor(0xFF0000)
               	.setTitle("haha funny")
               	.setAuthor({ name: "Destiny Compendium" })
