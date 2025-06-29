@@ -19,7 +19,7 @@ async function scrapeNightfallInfo(milestoneId, API_KEY) {
 
   const milestoneIdStr = milestoneId.toString();
 
-  const headerDiv = $(`div[id^="milestone_${milestoneIdStr}"]`).first();
+  const headerDiv = $(`div[id^="${milestoneIdStr}"]`).first();
   const contentId = headerDiv.attr('id');
 
   let nightfallName = null;
