@@ -97,21 +97,20 @@ module.exports = {
             // Re-fetch only if last fetch was before last weekly reset
             if ((!lastFetch || lastFetch < lastReset) && !globals.getBManifestLock()) {
               globals.setBManifestLock(true);
+              const waitEmbed = new EmbedBuilder()
+                .setColor(0xFF0000)
+	              .setTitle("Data Refreshing")
+	              .setAuthor({ name: "Destiny Compendium" })
+                .setDescription("Sorry, but the rotation data is currently refreshing. Please try again in a couple seconds.")
+	              .setThumbnail("https://i.imgur.com/MNab4aw.png")
+	              .setTimestamp();
+              
+              interaction.editReply({ embeds: [waitEmbed], ephmeral: false });
+              replied = true;
+              
               refetchBungie(client.bungietoken).then(data => {
                 globals.setLastBungieFetch(now.toISOString());
                 globals.setBManifest(data);
-
-                const waitEmbed = new EmbedBuilder()
-                  .setColor(0xFF0000)
-	                .setTitle("Data Refreshing")
-	                .setAuthor({ name: "Destiny Compendium" })
-                  .setDescription("Sorry, but the rotation data is currently refreshing. Please try again in a couple seconds.")
-	                .setThumbnail("https://i.imgur.com/MNab4aw.png")
-	                .setTimestamp();
-              
-                interaction.editReply({ embeds: [waitEmbed], ephmeral: false });
-                replied = true;
-
                 globals.setBManifestLock(false);
                 return;
               });
@@ -134,7 +133,7 @@ module.exports = {
                   let mod = globals.getBManifest().nightfallData.weapons[i].name;
                   if (!mod.includes("Unknown")) {
                     desc += mod;
-                    if (j < (globals.getBManifest().nightfallData.weapons.length - 1)) {
+                    if (i < (globals.getBManifest().nightfallData.weapons.length - 1)) {
                       desc += ", ";
                     }
                   }
