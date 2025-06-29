@@ -14,14 +14,14 @@ async function getManifestInventoryItems(API_KEY) {
 }
 
 async function scrapeNightfallInfo(milestoneId, API) {
-  const browser = await puppeteer.launch({ headless: true, args: [
+  const browser = await puppeteer.launch({ headless: "new", args: [
     '--no-sandbox',
     '--disable-setuid-sandbox',
-    '--disable-dev-shm-usage',
     '--disable-gpu',
+    '--disable-dev-shm-usage',
     '--single-process',
-    '--no-zygote',
-  ], });
+    '--no-zygote'
+  ], timeout: 60000, dumpio: true });
   const page = await browser.newPage();
   await page.goto('https://www.todayindestiny.com/', { waitUntil: 'domcontentloaded' });
 
