@@ -43,6 +43,13 @@ module.exports = {
         async execute(interaction, client) {
             const category = interaction.options.getString("category");
 
+            let catName = category;
+            for (const option of interaction.options.data) {
+              if (option.value === category) {
+                catName = option.name;
+              }
+            }
+
             await interaction.deferReply();
 
             let replied = false;
@@ -121,7 +128,7 @@ module.exports = {
 
               embed = new EmbedBuilder()
                 .setColor(0x00FF00)
-	              .setTitle(category)
+	              .setTitle(catName)
 	              .setAuthor({ name: "Destiny Compendium" })
 	              .setThumbnail("https://i.imgur.com/iR1JvU5.png")
 	              .setTimestamp()
