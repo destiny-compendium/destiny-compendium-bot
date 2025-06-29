@@ -10,7 +10,7 @@ async function getManifestInventoryItems(API_KEY) {
   });
   const manifest = await manifestRes.json();
   const inventoryPath = manifest.Response.jsonWorldComponentContentPaths.en.DestinyInventoryItemDefinition;
-  const inventoryRes = await fetch(`${MANIFEST_BASE}${inventoryPath}`);
+  const inventoryRes = await fetch(`${API_BASE}${inventoryPath}`);
   return inventoryRes.json();
 }
 
