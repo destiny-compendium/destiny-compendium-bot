@@ -152,6 +152,7 @@ module.exports = {
                   }
                 }
                 embed.setDescription(desc + "\n\n");
+                embed.addFields({ name: "", value: "----------------" });
               }
 
               const d = globals.getBManifest()[category];
@@ -188,6 +189,10 @@ module.exports = {
                   modifiers += "\n";
 
                   embed.addFields({ name: name, value: modifiers });
+
+                  if (i < (d.length - 1)) {
+                    embed.addFields({ name: "", value: "----------------" });
+                  }
 
                   /*if (i < (d.length - 1)) {
                     embed.addFields({ name: "\u200B", value: "\u200B" });
