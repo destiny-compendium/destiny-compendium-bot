@@ -152,6 +152,7 @@ module.exports = {
                   }
                 }
                 embed.setDescription(desc + "\n\n");
+                embed.addFields({ name: "", value: "----------------" });
               }
 
               const d = globals.getBManifest()[category];
