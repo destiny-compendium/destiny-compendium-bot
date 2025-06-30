@@ -46,7 +46,7 @@ module.exports = {
                     .setAuthor({ name: "Destiny Compendium" })
                     .setDescription(
                         `The **Destiny Compendium Bot support** can be contacted in several ways.\n
-                        You can contact the developers via **Discord DMs** by sending a DM to **dcrubro** or **zShiso**.\n
+                        You can contact the developers via **Discord DMs** by sending a DM to **dcrubro** or **zshiso**.\n
                         You can also contact **dcrubro** by sending an email to **info@dcrubro.com**.\n
                         *Note: Contacting via DMs might not get seen due to Discord privacy settings. An email has a higher chance of being seen.*`
                     )
