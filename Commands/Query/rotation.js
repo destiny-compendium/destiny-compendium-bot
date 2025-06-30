@@ -185,7 +185,7 @@ module.exports = {
                     modifiers += " -";
                   }
 
-                  modifiers += "\n";
+                  modifiers += "\n\n";
 
                   embed.addFields({ name: name, value: modifiers });
 
