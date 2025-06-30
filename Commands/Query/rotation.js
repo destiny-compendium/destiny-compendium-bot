@@ -188,7 +188,7 @@ module.exports = {
                   modifiers += "\n";
 
                   embed.addFields({ name: name, value: modifiers });
-                  embed.addFields({ name: "", value: "----------------" });
+                  embed.addFields({ name: '\u200B', value: '```────────────```' });
 
                   /*if (i < (d.length - 1)) {
                     embed.addFields({ name: "\u200B", value: "\u200B" });
