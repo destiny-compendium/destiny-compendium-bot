@@ -207,6 +207,11 @@ module.exports = {
                         .setTimestamp()
                         .setThumbnail("https://i.imgur.com/iR1JvU5.png")
                         .setFooter({ text: `Queried for '${query}' - Processed in ${processTime} ms` });
+                
+                    const data = reverseDesc[category].entries;
+                    for (let i = 0; i < data.length; i++) {
+                        embed.addFields({ name: data[i].encounter, value: data[i].desc });
+                    }
                 }
 
                 if (!replied) {
