@@ -5,6 +5,26 @@ const path = require('path');
 
 const icons = require("../../Resources/resources.json").icons;
 
+function errorEmbed(unspec = false) {
+  return new EmbedBuilder()
+	  .setColor(0xFF0000)
+	  .setTitle("An Error Occurred")
+	  .setAuthor({ name: "Destiny Compendium" })
+    .setDescription(unspec ? "You need to specify a request." : "Sorry, but an internal error occurred during your request.")
+	  .setThumbnail("https://i.imgur.com/MNab4aw.png")
+	  .setTimestamp();
+}
+
+function timeoutEmbed() {
+  return new EmbedBuilder()
+	  .setColor(0xFF0000)
+	  .setTitle("Timed Out")
+	  .setAuthor({ name: "Destiny Compendium" })
+    .setDescription("Sorry, but your request timed out during processing.")
+	  .setThumbnail("https://i.imgur.com/MNab4aw.png")
+	  .setTimestamp();
+}
+
 const reverseImage = {
     lw: false,
     gos: "https://i.imgur.com/RssIasC.jpeg",
