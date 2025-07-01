@@ -197,7 +197,7 @@ module.exports = {
         .addBooleanOption(option => option.setName("graphical").setDescription("Graphical output?").setRequired(false)),
 
         async execute(interaction, client) {
-            const category = interaction.options.getString("category");
+            const category = interaction.options.getString("activity");
             const graphical = interaction.options.getBoolean("graphical");
 
             await interaction.deferReply();
