@@ -226,7 +226,7 @@ module.exports = {
                         .setAuthor({ name: "Destiny Compendium" })
                         .setTimestamp()
                         .setThumbnail("https://i.imgur.com/iR1JvU5.png")
-                        .setFooter({ text: `Queried for '${query}' - Processed in ${processTime} ms` });
+                        .setFooter({ text: `Processed in ${processTime} ms` });
                 
                     const data = reverseDesc[category].entries;
                     for (let i = 0; i < data.length; i++) {
