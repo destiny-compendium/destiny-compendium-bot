@@ -40,7 +40,7 @@ module.exports = {
         .setName("rotation")
         .setDescription("Get the current featured activity rotation and their rewards.")
         .setDefaultMemberPermissions(PermissionFlagsBits.Everyone)
-        .addStringOption(option => option.setName("category").setDescription("Query category").setRequired(true)
+        .addStringOption(option => option.setName("category").setDescription("Rotation category").setRequired(true)
             .addChoices(
                 { name: "Raids", value: "Raid" },
                 { name: "Dungeons", value: "Dungeon" },

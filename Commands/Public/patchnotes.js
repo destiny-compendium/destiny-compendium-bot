@@ -39,6 +39,11 @@ function timeoutEmbed() {
 
 // Patch data
 const patchData = {
+  "1.3.0": {
+    date: "01/07/2025",
+    description:
+      "This version adds a new command, **/loottable**.\nThis command returns the per-encounter loot table for the specified activity (in text or graphical mode - credits to nietcool for the graphics).\n\nFor info on how to use it, you can do **/help** for the description, or just simply use it via **/loottable**.",
+  },
   "1.2.0": {
     date: "29/06/2025",
     description:
