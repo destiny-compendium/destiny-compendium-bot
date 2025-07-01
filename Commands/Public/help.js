@@ -57,6 +57,7 @@ module.exports = {
                     .setDescription(
                         `**/query <category> <query>**\nQueries the Destiny Compendium spreadsheet for your desired **query** in the selected **category**.\n
                         **/rotation <category>**\nReturns the current featured activity rotation for the specified category.\n
+                        **/loottable <activity> [graphical]\nReturns the per-encounter loot table for the specified activity (can set 'graphical' to True for a graphical loot table instead).\n
                         **/help**\nDisplay this menu.\n
                         **/info**\nDisplay bot info\n
                         **/patchnotes**\nBot patch notes\n
