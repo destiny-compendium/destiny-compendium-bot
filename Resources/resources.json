@@ -9,6 +9,23 @@
         "unstoppable": "<:unstoppable:1389589038809219223>",
         "overload": "<:overload:1389589058455605338>",
         "antibarrier": "<:antibarrier:1389589050662326342>",
-        "exoticengram": "<:exoticengram:1389596439855890584>"
+        "exoticengram": "<:exoticengram:1389596439855890584>",
+        "ar": "<:genericar:1389648757334736916>",
+        "bow": "<:genericbow:1389648759423762574>",
+        "fusion": "<:genericfusion:1389648761285902558>",
+        "gl": "<:genericgl:1389648763068612798>",
+        "glaive": "<:genericglaive:1389648764398075994>",
+        "hc": "<:generichc:1389648766012752035>",
+        "lfr": "<:genericlfr:1389649106410012832>",
+        "mg": "<:genericmg:1389648767359385710>",
+        "pulse": "<:genericpulse:1389648768642580554>",
+        "rocket": "<:genericrocket:1389648771004104886>",
+        "scout": "<:genericscout:1389648772476305438>",
+        "shotgun": "<:genericshotgun:1389649107924287529>",
+        "sidearm": "<:genericsidearm:1389648778814029824>",
+        "smg": "<:genericsmg:1389648781426823309>",
+        "sniper": "<:genericsniper:1389648784564424734>",
+        "sword": "<:genericsword:1389648786988470294>",
+        "trace": "<:generictrace:1389648789643464885>"
     }
 }
