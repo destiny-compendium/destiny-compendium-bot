@@ -39,6 +39,11 @@ function timeoutEmbed() {
 
 // Patch data
 const patchData = {
+  "1.3.1": {
+    date: "08/07/2025",
+    description:
+      "Fixed a bug where the **/query** command would return the incorrect entry image. If the image is not found or not embeddable, it will still fallback to the 'joeCool' emoji as the image.",
+  },
   "1.3.0": {
     date: "01/07/2025",
     description:
