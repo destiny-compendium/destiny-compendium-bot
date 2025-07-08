@@ -59,10 +59,10 @@ const reverseDesc = {
     gos:  {
         name: "Garden of Salvation",
         entries: [
-            { encounter: "1st - 'Evade the Consecrated Mind'", desc: `${icons.void} Zealot's Reward, ${icons.kinetic} Accrued Redemption, Leg Armor` },
-            { encounter: "2nd - 'Summon the Consecrated Mind'", desc: `${icons.arc} Prophet of Doom, ${icons.void} Reckless Oracle, Arms Armor` },
-            { encounter: "3rd - 'Defeat the Consecrated Mind'", desc: `${icons.void} Ancient Gospel, ${icons.kinetic} Sacred Provenance, Chest Armor` },
-            { encounter: "4th - 'Defeat the Sanctified Mind'", desc: `${icons.solar} Omniscient Eye, ${icons.arc} ${icons.overload} ${icons.exoticengram} Divinity, Head Armor, Class Armor` },
+            { encounter: "1st - 'Evade the Consecrated Mind'", desc: `${icons.fusion} Zealot's Reward, ${icons.bow} Accrued Redemption, Leg Armor` },
+            { encounter: "2nd - 'Summon the Consecrated Mind'", desc: `${icons.shotgun} Prophet of Doom, ${icons.ar} Reckless Oracle, Arms Armor` },
+            { encounter: "3rd - 'Defeat the Consecrated Mind'", desc: `${icons.hc} Ancient Gospel, ${icons.pulse} Sacred Provenance, Chest Armor` },
+            { encounter: "4th - 'Defeat the Sanctified Mind'", desc: `${icons.sniper} Omniscient Eye, ${icons.trace} ${icons.overload} ${icons.exoticengram} Divinity, Head Armor, Class Armor` },
         ],
         notes: "-"
     },
