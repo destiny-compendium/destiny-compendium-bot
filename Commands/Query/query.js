@@ -82,8 +82,8 @@ function findMatchAndDescription(row, prevRow, nextRow, query, maxLookahead, isA
       // image scan
       let rawImageCell = null;
       for (let offset = 1; offset < row.length; offset++) {
-        const leftIndex = i - offset;
-        const rightIndex = i + offset;
+        const leftIndex = i - 1;
+        const rightIndex = i + 1;
       
         if (leftIndex >= 0) {
           const left = row[leftIndex];
