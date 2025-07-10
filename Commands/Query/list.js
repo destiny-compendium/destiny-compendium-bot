@@ -180,6 +180,8 @@ module.exports = {
 
                 let descFilled = "Your query returned the following listing of hits:\n";
 
+                console.log(listings);
+
                 if (listings.length > 0) {
                   for (let i = 0; i < listings.length; i++) {
                     descFilled += ` - ${listings[i]}\n`;
