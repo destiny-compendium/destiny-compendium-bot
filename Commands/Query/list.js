@@ -190,7 +190,7 @@ module.exports = {
 
                 const embed = new EmbedBuilder()
                   .setColor(0x00FF00)
-                  .setTitle(match.matchedText)
+                  .setTitle("Listing Results")
                   .setAuthor({ name: "Destiny Compendium" })
                   .setDescription(descFilled)
                   .setTimestamp()
