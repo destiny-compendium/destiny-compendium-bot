@@ -72,8 +72,6 @@ function findMatchAndDescription(row, prevRow, nextRow, query, maxLookahead, isA
     const match = normalizedCell.match(regex);
 
     if (match) {
-      console.log(`[MATCH] Found match for '${query}' in cell [${i}]: '${row[i]}'`);
-    
       const entryTitle = row[i];
 
       return entryTitle;
@@ -172,7 +170,7 @@ module.exports = {
                 if (i !== 0) { prev = rows[i-1] }
                 if (i < rows.length - 1) { next = rows[i+1] }
                 match = findMatchAndDescription(rows[i], prev, next, query, maxLookahead, isArtifact);
-                if (match !== null) {
+                if (match !== null && match !== undefined) {
                   listings.push(match);
                 }
               }
