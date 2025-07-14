@@ -1,6 +1,6 @@
 const { CommandInteraction, ButtonInteraction } = require("discord.js");
 const { createLog } = require("../../Handlers/logHandler");
-const globals = require("../Util/globals");
+const globals = require("../../Util/globals");
 
 function outdatedEmbed() {
   return new EmbedBuilder()
