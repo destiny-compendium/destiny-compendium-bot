@@ -12,6 +12,16 @@ function errorEmbed() {
 	  .setTimestamp();
 }
 
+function unreachableEmbed() {
+  return new EmbedBuilder()
+	  .setColor(0xFF0000)
+	  .setTitle("Bungie API Unreachable")
+	  .setAuthor({ name: "Destiny Compendium" })
+    .setDescription("Sorry, but the Bungie API is currently unreachable. As a result this command will be unavailable until the API is available. Please try again later.")
+	  .setThumbnail("https://i.imgur.com/MNab4aw.png")
+	  .setTimestamp();
+}
+
 function timeoutEmbed() {
   return new EmbedBuilder()
 	  .setColor(0xFF0000)
@@ -119,13 +129,17 @@ module.exports = {
 	              .setTimestamp();
               
               interaction.editReply({ embeds: [waitEmbed], ephmeral: false });
-              replied = true;
               
               refetchBungie(client.bungietoken).then(data => {
                 globals.setLastBungieFetch(now.toISOString());
                 globals.setBManifest(data);
                 globals.setBManifestLock(false);
                 return;
+              }).catch(error => {
+                // The Bungie API or TiD might be dead.
+                interaction.editReply({ embeds: [unreachableEmbed], ephmeral: false });
+              }).finally(() => {
+                replied = true;
               });
             } else {
             try {

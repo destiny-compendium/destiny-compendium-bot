@@ -58,6 +58,7 @@ async function scrapeNightfallInfo(milestoneId, API_KEY) {
           }
         } catch (err) {
           console.warn(`Failed to fetch item ${hash}: ${err.message}`);
+          //throw new Error("Failed to fetch item.");
         }
       }
   
