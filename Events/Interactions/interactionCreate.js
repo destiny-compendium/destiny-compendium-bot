@@ -36,6 +36,7 @@ module.exports = {
             }
 
             console.log(interaction.commandName);
+            console.log(globals.getCommandBlacklist());
 
             if (interaction.commandName in globals.getCommandBlacklist()) {
                 interaction.reply({ embeds: [blacklistEmbed()] });
