@@ -1,5 +1,5 @@
 const { createLog } = require("./logHandler.js");
-const globals = require("../../Util/globals");
+const globals = require("../Util/globals");
 
 function loadCommands(client) {
     const ascii = require("ascii-table");
