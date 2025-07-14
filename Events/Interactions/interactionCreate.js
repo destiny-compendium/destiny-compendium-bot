@@ -35,6 +35,8 @@ module.exports = {
                 return;
             }
 
+            console.log(interaction.commandName);
+
             if (interaction.commandName in globals.getCommandBlacklist()) {
                 interaction.reply({ embeds: [blacklistEmbed()] });
                 createLog(`User "${interaction.user.id}" tried to run a blacklisted command!`, "WARNING", false, interaction.guild.id);
