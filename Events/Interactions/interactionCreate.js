@@ -33,9 +33,7 @@ module.exports = {
                 createLog(`User "${interaction.user.id}" tried to run an outdated command!`, "WARNING", false, interaction.guild.id);
             }
 
-            console.log(interaction.commandName + "\n\n\n\ntttttttt");
-
-            if (command in globals.getCommandBlacklist()) {
+            if (interaction.commandName in globals.getCommandBlacklist()) {
                 interaction.reply({ embeds: [blacklistEmbed()] });
                 createLog(`User "${interaction.user.id}" tried to run a blacklisted command!`, "WARNING", false, interaction.guild.id);
             }
