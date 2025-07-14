@@ -31,11 +31,15 @@ module.exports = {
             if (!command) {
                 interaction.reply({ embeds: [outdatedEmbed()] });
                 createLog(`User "${interaction.user.id}" tried to run an outdated command!`, "WARNING", false, interaction.guild.id);
+
+                return;
             }
 
             if (interaction.commandName in globals.getCommandBlacklist()) {
                 interaction.reply({ embeds: [blacklistEmbed()] });
                 createLog(`User "${interaction.user.id}" tried to run a blacklisted command!`, "WARNING", false, interaction.guild.id);
+
+                return;
             }
 
             await command.execute(interaction, client);
