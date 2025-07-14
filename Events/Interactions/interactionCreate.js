@@ -1,4 +1,4 @@
-const { CommandInteraction, ButtonInteraction } = require("discord.js");
+const { CommandInteraction, ButtonInteraction, EmbedBuilder } = require("discord.js");
 const { createLog } = require("../../Handlers/logHandler");
 const globals = require("../../Util/globals");
 
