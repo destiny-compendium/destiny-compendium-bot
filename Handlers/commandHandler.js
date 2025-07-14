@@ -1,6 +1,5 @@
 const { createLog } = require("./logHandler.js");
-
-const commandBlacklist = ["ping", "list", "ping.js", "list.js"];
+const globals = require("../../Util/globals");
 
 function loadCommands(client) {
     const ascii = require("ascii-table");
@@ -14,7 +13,7 @@ function loadCommands(client) {
         const commandFiles = fs.readdirSync(`./Commands/${folder}`).filter((file) => file.endsWith('.js'));
 
         for (const file of commandFiles) {
-            if (file.replace(".js", "") in commandBlacklist) { continue; }
+            if (file.replace(".js", "") in globals.getCommandBlacklist()) { continue; }
             const commandFile = require(`../Commands/${folder}/${file}`);
             
             client.commands.set(commandFile.data.name, commandFile);
