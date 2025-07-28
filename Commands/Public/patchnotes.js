@@ -39,6 +39,11 @@ function timeoutEmbed() {
 
 // Patch data
 const patchData = {
+  "1.3.2": {
+    date: "28/07/2025",
+    description:
+      "Added **The Desert Perpetual** raid to the **/loottable** command."
+  },
   "1.3.1": {
     date: "08/07/2025",
     description:
