@@ -255,6 +255,7 @@ module.exports = {
                 { name: "Root of Nightmares", value: "ron" },
                 { name: "Crota's End", value: "ce" },
                 { name: "Salvation's Edge", value: "se" },
+                { name: "The Desert Perpetual", value: "dp" },
                 { name: "The Shattered Throne", value: "d_throne" },
                 { name: "Pit of Heresy", value: "d_pit" },
                 { name: "Prophecy", value: "d_proph" },
