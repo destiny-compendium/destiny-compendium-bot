@@ -35,6 +35,7 @@ const reverseImage = {
     ron: "https://i.imgur.com/tnnQKqK.jpeg",
     ce: "https://i.imgur.com/PQMrvMM.jpeg",
     se: "https://i.imgur.com/0y8w6Tt.jpeg",
+    dp: "https://i.imgur.com/uFdvINA.png",
     d_throne: false,
     d_pit: false,
     d_proph: "https://i.imgur.com/sTwhB2k.png",
@@ -137,6 +138,16 @@ const reverseDesc = {
             { encounter: "3rd - 'Repository'", desc: `${icons.stasis} Critical Anomaly, ${icons.void} Forthcoming Deviance, ${icons.solar} Nullify, Arms Armor, Class Armor` },
             { encounter: "4th - 'Verity'", desc: `${icons.strand} Imminence, ${icons.arc} Summum Bonum, ${icons.arc} Non-Denouement, Chest Armor, Leg Armor` },
             { encounter: "5th - 'The Witness'", desc: `${icons.stasis} Critical Anomaly, ${icons.arc} Summum Bonum, ${icons.solar} Nullify, ${icons.strand} ${icons.exoticengram} Euphony, Head Armor, Leg Armor` },
+        ],
+        notes: "-"
+    },
+    dp: {
+        name: "The Desert Perpetual",
+        entries: [
+            { encounter: "Iatros, Inward-Turned (Wyvern)", desc: `${icons.stasis} The When and Where, ${icons.solar} Finite Maybe, ${icons.stasis} Intercalary, Head Armor, Chest Armor, Class Armor` },
+            { encounter: "Epoptes, Lord of Quanta (Hydra)", desc: `${icons.stasis} The When and Where, ${icons.strand} Lance Ephemeral, ${icons.arc} Opaque Hourglass, Arms Armor, Leg Armor, Class Armor` },
+            { encounter: "Agraios, Inherent (Hobgoblin)", desc: `${icons.arc} Antedante, ${icons.strand} Lance Ephemeral, ${icons.stasis} Intercalary, Head Armor, Arms Armor, Chest Armor` },
+            { encounter: "Koregos, The Worldline (Harpy)", desc: `${icons.arc} Antedante, ${icons.solar} Finite Maybe, ${icons.arc} Opaque Hourglass, ${icons.strand} ${icons.exoticengram} Whirling Ovation, Head Armor, Arms Armor, Leg Armor` },
         ],
         notes: "-"
     },
