@@ -39,6 +39,11 @@ function timeoutEmbed() {
 
 // Patch data
 const patchData = {
+  "1.4.0": {
+    date: "07/08/2025",
+    description:
+      "Added a new command, **/list**, which allows you get get a **listing of all entries in a specific category that fit your query**. This is useful to try and find what you're generally looking for if you're unsure about the entry name.\n\nFor info on how to use it, you can do **/help** for the description, or just simply use it via **/list**."
+  },
   "1.3.2": {
     date: "28/07/2025",
     description:

@@ -7,7 +7,7 @@ class Globals {
         this.lastBungieFetch = null;
         this.bManifest = null;
         this.bManifestLock = false;
-        this.commandBlacklist = ["ping", "list", "ping.js", "list.js"];
+        this.commandBlacklist = ["ping", "ping.js"];
         
         Globals.instance = this;
     }

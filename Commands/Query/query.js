@@ -418,4 +418,6 @@ module.exports = {
 
             return;
         },
+  findMatchAndDescription,
+  escapeRegex
 };
