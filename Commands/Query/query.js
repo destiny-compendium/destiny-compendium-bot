@@ -143,7 +143,7 @@ function findMatchAndDescription(row, prevRow, nextRow, query, maxLookahead, isA
             validDesc = true;
 
             const additional = nextRow?.[i + j];
-            const shouldAppend = typeof additional === "string" && doubleLineEntries.some(kw => entryTitle.includes(kw));
+            const shouldAppend = typeof additional === "string" && doubleLineEntries.some(kw => row[i].includes(kw));
 
             if (shouldAppend) {
               description += `\n\n${additional};`
@@ -154,12 +154,6 @@ function findMatchAndDescription(row, prevRow, nextRow, query, maxLookahead, isA
             break;
           }
         }
-      }
-
-      if (typeof entryTitle === 'string' &&
-          doubleLineEntries.some(kw => entryTitle.includes(kw))
-      ) {
-
       }
 
       if (!validDesc) {
