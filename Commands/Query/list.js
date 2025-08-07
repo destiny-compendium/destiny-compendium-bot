@@ -116,10 +116,12 @@ module.exports = {
 
         const result = findMatchAndDescription(rows[i], prev, next, query, maxLookahead, isArtifact);
         if (result !== null) {
-          const isImageFormula = typeof result.matchedText === 'string' && result.matchedText.startsWith('=IMAGE(');
-          const isDirectImageURL = typeof result.matchedText === 'string' && result.matchedText.startsWith('http');
-          if (!isImageFormula && !isDirectImageURL) {
-            matches.push(result.matchedText.trim().replace(/\s+/g, ' '));
+          const text = typeof result.matchedText === 'string' ? result.matchedText.split("\n")[0].trim() : '';
+          const isImageFormula = text.startsWith('=IMAGE(');
+          const isDirectImageURL = text.startsWith('http');
+          
+          if (!isImageFormula && !isDirectImageURL && text.length > 0) {
+            matches.push(text);
           }
         }
       }
