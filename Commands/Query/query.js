@@ -7,6 +7,7 @@ const path = require('path');
 
 const grenadeAspects = ["Touch of Flame", "Touch of Winter", "Touch of Thunder", "Mindspun Invocation", "Chaos Accelerant (Charged)", "Chaos Accelerant", "Chaos Accelerant\n(Charged)"];
 const ignoreGrenadeList = ["grenade", "grapple", "axion", "void"];
+const doubleLineEntries = ["AION Renewal", "AION Adapter", "Bushido", "Collective Psyche", "Last Discipline", "Lustrous", "Techsec", "Twofold Crown"];
 
 function formatRowFromArray(row) {
     const label = row[0] || row[1] || '';      // Column A or B
@@ -140,11 +141,26 @@ function findMatchAndDescription(row, prevRow, nextRow, query, maxLookahead, isA
       
             description = next;
             validDesc = true;
+
+            const additional = nextRow?.[i + j];
+            const shouldAppend = typeof additional === "string" && doubleLineEntries.some(kw => entryTitle.includes(kw));
+
+            if (shouldAppend) {
+              description += `\n\n${additional};`
+              console.log(`[DESC+] Appended additional line from nextRow[${i + j}]`);
+            }
+
             console.log(`[DESC] Using row[${i + j}] as description`);
             break;
           }
         }
-      }      
+      }
+
+      if (typeof entryTitle === 'string' &&
+          doubleLineEntries.some(kw => entryTitle.includes(kw))
+      ) {
+
+      }
 
       if (!validDesc) {
         console.log(`[DESC] No valid description found`);
