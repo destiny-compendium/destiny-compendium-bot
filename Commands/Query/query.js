@@ -14,7 +14,7 @@ function formatRowFromArray(row) {
     return `${label}\n\n${body}`;
 }
 
-export function escapeRegex(str) {
+function escapeRegex(str) {
   return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
@@ -58,7 +58,7 @@ function timeoutEmbed() {
 	  .setTimestamp();
 }
 
-export function findMatchAndDescription(row, prevRow, nextRow, query, maxLookahead, isArtifact) {
+function findMatchAndDescription(row, prevRow, nextRow, query, maxLookahead, isArtifact) {
   const cleanQuery = normalizeForFuzzyMatch(query);
   const regex = new RegExp(cleanQuery, 'i');
 
@@ -418,4 +418,6 @@ module.exports = {
 
             return;
         },
+  findMatchAndDescription,
+  escapeRegex
 };
