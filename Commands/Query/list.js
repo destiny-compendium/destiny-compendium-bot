@@ -116,7 +116,11 @@ module.exports = {
 
         const result = findMatchAndDescription(rows[i], prev, next, query, maxLookahead, isArtifact);
         if (result !== null) {
-          matches.push(result.matchedText);
+          const isImageFormula = typeof result.matchedText === 'string' && result.matchedText.startsWith('=IMAGE(');
+          const isDirectImageURL = typeof result.matchedText === 'string' && result.matchedText.startsWith('http');
+          if (!isImageFormula && !isDirectImageURL) {
+            matches.push(result.matchedText.trim().replace(/\s+/g, ' '));
+          }
         }
       }
 
@@ -133,14 +137,17 @@ module.exports = {
           .setTimestamp();
 
         await interaction.editReply({ embeds: [embed] });
+        replied = true;
 
       } else {
         await interaction.editReply({ embeds: [failEmbed(query, processTime)] });
+        replied = true;
       }
 
     } catch (error) {
       console.error("List command failed:", error);
       await interaction.editReply({ embeds: [errorEmbed()] });
+      replied = true;
     }
   }
 };
