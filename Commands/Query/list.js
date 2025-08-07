@@ -1,12 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } = require("discord.js");
-const { escapeRegex } = require("./query");
-const { findMatchAndDescription } = require("./query");
+const { escapeRegex, findMatchAndDescription } = require("./query");
 const grenadeAspects = ["Touch of Flame", "Touch of Winter", "Touch of Thunder", "Mindspun Invocation", "Chaos Accelerant (Charged)", "Chaos Accelerant", "Chaos Accelerant\n(Charged)"];
 const ignoreGrenadeList = ["grenade", "grapple", "axion", "void"];
-
-function normalizeForFuzzyMatch(str) {
-  return escapeRegex(str).replace(/[' -]/g, '');
-}
 
 function failEmbed(query, processTime) {
   return new EmbedBuilder()
@@ -17,6 +12,26 @@ function failEmbed(query, processTime) {
     .setThumbnail("https://i.imgur.com/MNab4aw.png")
     .setFooter({ text: `Query: '${query}' • ${processTime} ms` })
     .setTimestamp();
+}
+
+function errorEmbed(unspec = false) {
+  return new EmbedBuilder()
+	  .setColor(0xFF0000)
+	  .setTitle("An Error Occurred")
+	  .setAuthor({ name: "Destiny Compendium" })
+    .setDescription(unspec ? "You need to specify a query." : "Sorry, but an internal error occurred during your query.")
+	  .setThumbnail("https://i.imgur.com/MNab4aw.png")
+	  .setTimestamp();
+}
+
+function timeoutEmbed() {
+  return new EmbedBuilder()
+	  .setColor(0xFF0000)
+	  .setTitle("Timed Out")
+	  .setAuthor({ name: "Destiny Compendium" })
+    .setDescription("Sorry, but your query timed out during processing.")
+	  .setThumbnail("https://i.imgur.com/MNab4aw.png")
+	  .setTimestamp();
 }
 
 module.exports = {
@@ -49,6 +64,21 @@ module.exports = {
 
     await interaction.deferReply();
 
+    let replied = false;
+
+    // Set your timeout (e.g., 60 seconds)
+    const timeout = setTimeout(async () => {
+      if (!replied) {
+        await interaction.editReply({ embeds: [timeoutEmbed()] });
+        replied = true;
+      }
+    }, 10000); // 60,000 ms = 60 seconds
+            
+    if (query === "" || query === null || query === undefined) {
+      interaction.editReply({ embeds: [errorEmbed(true)], ephermal: false });
+      return;
+    }
+
     try {
       const sheetId = client.sheetid;
       const range = category + "!A1:Z";
@@ -70,7 +100,7 @@ module.exports = {
       );
 
       if (!Array.isArray(values) || values.length === 0) {
-        await interaction.editReply({ content: "Sheet appears to be empty." });
+        await interaction.editReply({ embeds: [failEmbed(query, -1)] });
         return;
       }
 
@@ -95,9 +125,10 @@ module.exports = {
       if (matches.length > 0) {
         const embed = new EmbedBuilder()
           .setColor(0x00FF00)
+          .setThumbnail("https://i.imgur.com/iR1JvU5.png")
           .setTitle(`Matches for "${query}" in ${category}`)
           .setAuthor({ name: "Destiny Compendium" })
-          .setDescription(matches.slice(0, 20).map((match, i) => `${i + 1}. ${match}`).join("\n"))
+          .setDescription(matches.slice(0, 25).map((match, i) => `${i + 1}. ${match}`).join("\n")) // Realistically, we probably won't exceed 25 matches.
           .setFooter({ text: `Found ${matches.length} result(s) • ${processTime} ms` })
           .setTimestamp();
 
@@ -109,7 +140,7 @@ module.exports = {
 
     } catch (error) {
       console.error("List command failed:", error);
-      await interaction.editReply({ content: "An error occurred while processing your request." });
+      await interaction.editReply({ embeds: [errorEmbed()] });
     }
   }
 };
