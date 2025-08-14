@@ -121,10 +121,10 @@ module.exports = {
                     `The latest Bungie TWID can be found [here](${final.Link})`
                 )
                 .addFields(
-                  { name: "Post Description", value: final.Description },
+                  { name: "Post Description", value: `*${final.Description}*` },
                   { name: "Publication Date", value: formatPubDate(final.PubDate) }
                 )
-                .setThumbnail("https://i.imgur.com/F9KcQzL.png")
+                .setThumbnail("https://i.imgur.com/iR1JvU5.png")
                 .setImage(final.ImagePath)
                 .setTimestamp();
                 
