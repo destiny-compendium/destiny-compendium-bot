@@ -11,6 +11,16 @@ function errorEmbed() {
 	  .setTimestamp();
 }
 
+function failEmbed() {
+  return new EmbedBuilder()
+	  .setColor(0xFF0000)
+	  .setTitle("TWID Not Found")
+	  .setAuthor({ name: "Destiny Compendium" })
+    .setDescription("Sorry, but the latest TWID could not be found. Try checking the news page yourself [here](https://www.bungie.net/7/en/News).")
+	  .setThumbnail("https://i.imgur.com/MNab4aw.png")
+	  .setTimestamp();
+}
+
 function timeoutEmbed() {
   return new EmbedBuilder()
 	  .setColor(0xFF0000)
@@ -19,6 +29,30 @@ function timeoutEmbed() {
       .setDescription("Sorry, but your query timed out during processing.")
 	  .setThumbnail("https://i.imgur.com/MNab4aw.png")
 	  .setTimestamp();
+}
+
+function getOrdinalSuffix(day) {
+  if (day > 3 && day < 21) return "th"; // 11th, 12th, 13th...
+  switch (day % 10) {
+    case 1: return "st";
+    case 2: return "nd";
+    case 3: return "rd";
+    default: return "th";
+  }
+}
+
+function formatPubDate(pubDateStr) {
+  const date = new Date(pubDateStr);
+
+  const day = date.getDate();
+  const suffix = getOrdinalSuffix(day);
+  const monthName = date.toLocaleString("en-US", { month: "long" });
+  const year = date.getFullYear();
+
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+
+  return `${day}${suffix} of ${monthName} ${year} at ${hours}:${minutes}`;
 }
 
 module.exports = {
@@ -56,15 +90,27 @@ module.exports = {
                 TITLE_MATCH.test(article.Title)
               );
 
+              let final = null;
+
               if (!latestTWID) {
                 console.log("No TWID found.");
               } else {
-                console.log({
-                  Link: latestTWID.Link,
+                final = {
+                  Link: "https://www.bungie.net" + latestTWID.Link,
                   PubDate: latestTWID.PubDate,
                   ImagePath: latestTWID.ImagePath,
                   Description: latestTWID.Description
+                };
+                console.log(final);
+              }
+              
+              if (!final) {
+                interaction.editReply({
+                  embeds: [failEmbed()],
+                  ephemeral: false
                 });
+                clearTimeout();
+                replied = true;
               }
 
               const embed = new EmbedBuilder()
@@ -72,9 +118,14 @@ module.exports = {
                 .setTitle("Latest TWID")
                 .setAuthor({ name: "Destiny Compendium" })
                 .setDescription(
-                    `The latest Bungie TWID can be found [here](${"https://example.com"})`
+                    `The latest Bungie TWID can be found [here](${final.Link})`
+                )
+                .addFields(
+                  { name: "Post Description", value: final.Description },
+                  { name: "Publication Date", value: formatPubDate(final.PubDate) }
                 )
                 .setThumbnail("https://i.imgur.com/F9KcQzL.png")
+                .setImage(final.ImagePath)
                 .setTimestamp();
                 
               interaction.editReply({
