@@ -1,5 +1,4 @@
 const { fetch } = require("undici");
-const { XMLParser } = require("fast-xml-parser");
 const { SlashCommandBuilder, CommandInteraction, PermissionFlagsBits, EmbedBuilder, EntryPointCommandHandlerType } = require("discord.js");
 
 function errorEmbed() {
@@ -22,35 +21,6 @@ function timeoutEmbed() {
 	  .setTimestamp();
 }
 
-function coerceItemsFromApiResponse(json) {
-  // Bungie returns either a raw RSS XML string or an object with Items.
-  const resp = json?.Response;
-  if (!resp) return [];
-
-  // Case 1: already parsed-style object with Items
-  if (resp.Items && Array.isArray(resp.Items)) {
-    return resp.Items.map(i => ({
-      title: i.Title ?? i.title,
-      link: i.Link ?? i.link,
-      pubDate: i.PubDate ?? i.pubDate
-    }));
-  }
-
-  // Case 2: Response is a string containing RSS XML
-  if (typeof resp === "string") {
-    const parser = new XMLParser({ ignoreAttributes: false });
-    const xml = parser.parse(resp);
-    const items = xml?.rss?.channel?.item || [];
-    return items.map(i => ({
-      title: i.title,
-      link: i.link,
-      pubDate: i.pubDate
-    }));
-  }
-
-  return [];
-}
-
 module.exports = {
     data: new SlashCommandBuilder()
         .setName("twid")
@@ -71,7 +41,7 @@ module.exports = {
             }, 10000); // 60,000 ms = 60 seconds
 
             try {
-              const RSS_URL = "https://www.bungie.net/Platform/Content/Rss/NewsArticles/0/?categoryfilter=Destiny2";
+              const RSS_URL = "https://www.bungie.net/Platform/Content/Rss/NewsArticles/0/";
               const TITLE_MATCH = /this week in destiny/i;
 
               const r = await fetch(RSS_URL, {
@@ -81,26 +51,21 @@ module.exports = {
                 throw new Error(`Bungie API error: ${r.status} ${r.statusText}`);
               }
               const data = await r.json();
-              console.log(data);
 
-              const items = coerceItemsFromApiResponse(data);
-            
-              const twids = items.filter(i => TITLE_MATCH.test(i.title ?? ""));
-              if (twids.length === 0) {
-                console.log("No TWID found on the first RSS page.");
-              }
-            
-              // Pick the newest by pubDate
-              twids.sort(
-                (a, b) => new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime()
+              const latestTWID = data.Response.NewsArticles.find(article =>
+                TITLE_MATCH.test(article.Title)
               );
-              const latest = twids[0];
-            
-              console.log({
-                title: latest.title,
-                url: latest.link,
-                published: latest.pubDate
-              });
+
+              if (!latestTWID) {
+                console.log("No TWID found.");
+              } else {
+                console.log({
+                  Link: latestTWID.Link,
+                  PubDate: latestTWID.PubDate,
+                  ImagePath: latestTWID.ImagePath,
+                  Description: latestTWID.Description
+                });
+              }
 
               const embed = new EmbedBuilder()
                 .setColor(0x0000FF)
