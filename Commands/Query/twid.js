@@ -113,8 +113,10 @@ module.exports = {
                 replied = true;
               }
 
+              const processTime = Date.now() - interaction.createdTimestamp;
+
               const embed = new EmbedBuilder()
-                .setColor(0x0000FF)
+                .setColor(0x00FF00)
                 .setTitle("Latest TWID")
                 .setAuthor({ name: "Destiny Compendium" })
                 .setDescription(
@@ -126,7 +128,8 @@ module.exports = {
                 )
                 .setThumbnail("https://i.imgur.com/iR1JvU5.png")
                 .setImage(final.ImagePath)
-                .setTimestamp();
+                .setTimestamp()
+                .setFooter({ text: `Processed in ${processTime} ms` });
                 
               interaction.editReply({
                 embeds: [embed],
