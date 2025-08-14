@@ -39,6 +39,11 @@ function timeoutEmbed() {
 
 // Patch data
 const patchData = {
+  "1.4.1": {
+    date: "15/08/2025",
+    description:
+      "Added a new command, **/twid**, which **returns the latest Bungie TWID**.\n\nFor info on how to use it, you can do **/help** for the description, or just simply use it via **/twid**."
+  },
   "1.4.0": {
     date: "07/08/2025",
     description:
