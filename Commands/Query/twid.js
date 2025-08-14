@@ -1,3 +1,5 @@
+const axios = require("axios");
+const cheerio = require("cheerio");
 const { SlashCommandBuilder, CommandInteraction, PermissionFlagsBits, EmbedBuilder, EntryPointCommandHandlerType } = require("discord.js");
 
 function errorEmbed() {
