@@ -81,12 +81,13 @@ module.exports = {
                 throw new Error(`Bungie API error: ${r.status} ${r.statusText}`);
               }
               const data = await r.json();
+              console.log(data);
+
               const items = coerceItemsFromApiResponse(data);
             
               const twids = items.filter(i => TITLE_MATCH.test(i.title ?? ""));
               if (twids.length === 0) {
                 console.log("No TWID found on the first RSS page.");
-                process.exit(0);
               }
             
               // Pick the newest by pubDate
