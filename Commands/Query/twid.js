@@ -121,6 +121,15 @@ module.exports = {
             }, 10000); // 60,000 ms = 60 seconds
 
             try {
+              (async () => {
+  const href = await findLinkedH1Href(
+    "https://example.com",
+    "Your Title",
+    { debug: true, strictParentOnly: false }
+  );
+  console.log("Resolved href:", href);
+})();
+
               findLinkedH1Href("https://www.bungie.net/7/en/News", "This Week in Destiny")
                 .then((data) => {
                   console.log(data);
