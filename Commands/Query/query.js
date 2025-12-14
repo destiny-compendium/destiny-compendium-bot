@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, CommandInteraction, PermissionFlagsBits, EmbedBuilder } = require("discord.js");
+const { SlashCommandBuilder, CommandInteraction, PermissionFlagsBits, EmbedBuilder, StringSelectMenuBuilder, ActionRowBuilder } = require("discord.js");
 const { querySheet } = require("../../Util/querySheet");
 const { content } = require("googleapis/build/src/apis/content");
 
@@ -230,7 +230,7 @@ module.exports = {
             }, 10000); // 60,000 ms = 60 seconds
             
             if (query === "" || query === null || query === undefined) {
-              interaction.editReply({ embeds: [errorEmbed(true)], ephermal: false });
+              interaction.editReply({ embeds: [errorEmbed(true)], ephemeral: false });
               return;
             }
             
@@ -248,75 +248,10 @@ module.exports = {
               return;
             }
 
-            // Attempt to first query the local cache
-            let cursor = "0";
-            const redisPattern = "*" + query + "*"; // Redis wildcard is "*"
-            let firstMatch = null;
+            const range = category + "!A1:Z"; // The whole sheet
+            const id = client.sheetid;
 
-            do {
-              const { cursor: nextCursor, keys } = await client.redis.scan(cursor, {
-                MATCH: redisPattern,
-                COUNT: 100
-              });
-
-              if (keys.length > 0) {
-                firstMatch = keys[0];
-                break;
-              }
-
-              cursor = nextCursor;
-
-            } while (cursor !== "0");
-
-            // Eh, it works or something
-            if (firstMatch) {
-              if (firstMatch.startsWith("image.")) {
-                firstMatch = firstMatch.replace("image.", ""); // Dirty fix for the bug that happens when fetching a cached entry for "Willbreaker Munitions".
-              }
-
-              const value = await client.redis.get(firstMatch);
-              const imageBase64 = await client.redis.get(`image.${firstMatch}`);
-            
-              try {
-                const processTime = Date.now() - interaction.createdTimestamp;
-            
-                const embed = new EmbedBuilder()
-                  .setColor(0x00FF00)
-                  .setTitle(firstMatch)
-                  .setAuthor({ name: "Destiny Compendium" })
-                  .setDescription(value)
-                  .setTimestamp()
-                  .setFooter({ text: `Queried for '${query}' - Processed in ${processTime} ms` });
-            
-                if (imageBase64) {
-                  // This is not actually base64, I'm just lazy and don't want to refactor
-                  embed.setThumbnail(imageBase64);
-                  console.log(`[REDIS] Using cached image for: image.${firstMatch}`);
-                } else {
-                  embed.setThumbnail("https://i.imgur.com/iR1JvU5.png");
-                  console.log(`[REDIS] No image found for: image.${firstMatch}, using fallback.`);
-                }
-            
-                await interaction.editReply({
-                  embeds: [embed],
-                  ephemeral: false
-                });
-            
-                clearTimeout();
-                replied = true;
-            
-              } catch (error) {
-                if (!replied) {
-                  await interaction.editReply({ embeds: [errorEmbed()] });
-                  replied = true;
-                }
-                clearTimeout();
-                console.error(error);
-              }
-            } else {
-              const range = category + "!A1:Z"; // The whole sheet
-              const id = client.sheetid;
-
+            try {
               const res = await client.sheets.spreadsheets.get({
                 spreadsheetId: id,
                 ranges: [range],
@@ -335,99 +270,137 @@ module.exports = {
               );
 
               if (!Array.isArray(values) || values.length === 0) {
-                  return []; // no data or sheet is empty
-              }
-            
-              const [headers, ...rows] = values;
-              const regex = new RegExp(`^${escapeRegex(query)}`, 'i');  // case-insensitive partial match
-
-              const columnIndexes = [0, 1];
-              const skipIndexes = new Set([0, 1]);
-
-              // Rank all matching rows by score (shortest matched cell)
-              const maxLookahead = category === "Exotic Weapons" ? 3 : 2;
-              const isArtifact = (category === "Artifact Perks" || category === "Old Episodic Artifact Perks");
-              let match = [];
-
-              try {
-                for (let i = 0; i < rows.length; i++) {
-                  let prev = null;
-                  let next = null;
-                  if (i !== 0) { prev = rows[i-1] }
-                  if (i < rows.length - 1) { next = rows[i+1] }
-                  match = findMatchAndDescription(rows[i], prev, next, query, maxLookahead, isArtifact);
-                  if (match !== null) {
-                    break;
-                  }
-                }
-
-                if (match) {
-                  const processTime = Date.now() - interaction.createdTimestamp;
-
-                  let imageBase64 = null;
-                  
-                  if (match.rawImageCell && typeof match.rawImageCell === 'string') {
-                    const imageUrl = extractImageUrl(match.rawImageCell) || (
-                      match.rawImageCell.startsWith("http") ? match.rawImageCell : null
-                    );
-                  
-                    if (imageUrl) {
-                      try {
-                        //const axios = require('axios');
-                        //const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
-                        //const mimeType = response.headers['content-type'];
-                        //const base64 = Buffer.from(response.data, 'binary').toString('base64');
-                        //imageBase64 = `data:${mimeType};base64,${base64}`;
-                        
-                        imageBase64 = imageUrl;
-                        await client.redis.set(`image.${match.matchedText}`, imageUrl);
-                      } catch (err) {
-                        console.warn("Image store failed:", err.message);
-                      }
-                    }
-                  }
-
-                  const embed = new EmbedBuilder()
-                    .setColor(0x00FF00)
-                    .setTitle(match.matchedText)
-                    .setAuthor({ name: "Destiny Compendium" })
-                    .setDescription(match.description)
-                    .setTimestamp()
-                    .setFooter({ text: `Queried for '${query}' - Processed in ${processTime} ms` });
-
-                  if (imageBase64) {
-                    embed.setThumbnail(imageBase64);
-                  } else {
-                    embed.setThumbnail("https://i.imgur.com/iR1JvU5.png");
-                  }
-
-                  interaction.editReply({
-                    embeds: [embed],
-                    ephemeral: false
-                  });
-
-                  await client.redis.set(match.matchedText, match.description);
-                } else {
-                  interaction.editReply({
+                  await interaction.editReply({
                     embeds: [failEmbed(query, Date.now() - interaction.createdTimestamp)],
                     ephemeral: false
                   });
-                }
-                clearTimeout();
-                replied = true;
-
-              } catch (error) {
-                if (!replied) {
-                  await interaction.editReply({ embeds: [errorEmbed()] });
+                  clearTimeout(timeout);
                   replied = true;
-                }
-                clearTimeout();
-                console.error(error);
+                  return;
               }
+            
+              const [headers, ...rows] = values;
+
+              // Collect ALL matching results
+              const maxLookahead = category === "Exotic Weapons" ? 3 : 2;
+              const isArtifact = (category === "Artifact Perks" || category === "Old Episodic Artifact Perks");
+              let matches = [];
+
+              for (let i = 0; i < rows.length; i++) {
+                let prev = null;
+                let next = null;
+                if (i !== 0) { prev = rows[i-1] }
+                if (i < rows.length - 1) { next = rows[i+1] }
+                const match = findMatchAndDescription(rows[i], prev, next, query, maxLookahead, isArtifact);
+                if (match !== null) {
+                  matches.push(match);
+                }
+              }
+
+              if (matches.length === 0) {
+                await interaction.editReply({
+                  embeds: [failEmbed(query, Date.now() - interaction.createdTimestamp)],
+                  ephemeral: false
+                });
+                clearTimeout(timeout);
+                replied = true;
+                return;
+              }
+
+              const processTime = Date.now() - interaction.createdTimestamp;
+
+              // If only one match, show it directly
+              if (matches.length === 1) {
+                const match = matches[0];
+                let imageBase64 = null;
+                
+                if (match.rawImageCell && typeof match.rawImageCell === 'string') {
+                  const imageUrl = extractImageUrl(match.rawImageCell) || (
+                    match.rawImageCell.startsWith("http") ? match.rawImageCell : null
+                  );
+                
+                  if (imageUrl) {
+                    try {
+                      imageBase64 = imageUrl;
+                      await client.redis.set(`image.${match.matchedText}`, imageUrl);
+                    } catch (err) {
+                      console.warn("Image store failed:", err.message);
+                    }
+                  }
+                }
+
+                const embed = new EmbedBuilder()
+                  .setColor(0x00FF00)
+                  .setTitle(match.matchedText)
+                  .setAuthor({ name: "Destiny Compendium" })
+                  .setDescription(match.description)
+                  .setTimestamp()
+                  .setFooter({ text: `Queried for '${query}' - Processed in ${processTime} ms` });
+
+                if (imageBase64) {
+                  embed.setThumbnail(imageBase64);
+                } else {
+                  embed.setThumbnail("https://i.imgur.com/iR1JvU5.png");
+                }
+
+                await interaction.editReply({
+                  embeds: [embed],
+                  ephemeral: false
+                });
+
+                await client.redis.set(match.matchedText, match.description);
+              } else {
+                // Multiple matches - show as select menu
+                const selectMenu = new StringSelectMenuBuilder()
+                  .setCustomId(`query_select_${interaction.id}`)
+                  .setPlaceholder('Select a result...')
+                  .setMaxValues(1);
+
+                // Add options (limit to 25 as per Discord's restriction)
+                matches.slice(0, 25).forEach((match, index) => {
+                  selectMenu.addOptions({
+                    label: match.matchedText.substring(0, 100),
+                    value: index.toString(),
+                    description: match.description.substring(0, 100) || 'No description'
+                  });
+                });
+
+                const row = new ActionRowBuilder().addComponents(selectMenu);
+
+                const embed = new EmbedBuilder()
+                  .setColor(0x0099FF)
+                  .setTitle("Multiple Results Found")
+                  .setAuthor({ name: "Destiny Compendium" })
+                  .setDescription(`Found ${matches.length} results for '${query}'. Select one below to view details.`)
+                  .setTimestamp()
+                  .setFooter({ text: `Processed in ${processTime} ms` });
+
+                await interaction.editReply({
+                  embeds: [embed],
+                  components: [row],
+                  ephemeral: false
+                });
+
+                // Store matches in a temporary cache for the selection handler
+                await client.redis.set(`query_matches_${interaction.id}`, JSON.stringify(matches));
+                await client.redis.expire(`query_matches_${interaction.id}`, 3600); // Expire after 1 hour
+              }
+
+              clearTimeout(timeout);
+              replied = true;
+
+            } catch (error) {
+              if (!replied) {
+                await interaction.editReply({ embeds: [errorEmbed()] });
+                replied = true;
+              }
+              clearTimeout(timeout);
+              console.error(error);
             }
 
             return;
         },
   findMatchAndDescription,
-  escapeRegex
+  escapeRegex,
+  extractImageUrl
 };
