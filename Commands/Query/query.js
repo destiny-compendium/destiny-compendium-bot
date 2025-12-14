@@ -28,6 +28,16 @@ function normalizeForFuzzyMatch(str) {
   return escapeRegex(str).replace(/[' -]/g, '');
 }
 
+function cleanTextForDropdown(str) {
+  // Remove markdown formatting (**, __, ~~, *, _, etc.)
+  let cleaned = str.replace(/\*\*|__|\*|_|~~|`/g, '');
+  // Remove emoji embeds like <:name:id> and custom emoji patterns
+  cleaned = cleaned.replace(/<:[^:]+:\d+>|<:[^>]+>/g, '');
+  // Remove extra whitespace
+  cleaned = cleaned.trim();
+  return cleaned;
+}
+
 function failEmbed(query, processTime) {
   return new EmbedBuilder()
 	  .setColor(0xFF0000)
@@ -361,7 +371,7 @@ module.exports = {
                   selectMenu.addOptions({
                     label: match.matchedText.substring(0, 100),
                     value: index.toString(),
-                    description: match.description.substring(0, 100) || 'No description'
+                    description: cleanTextForDropdown(match.description).substring(0, 100) || 'No description'
                   });
                 });
 
@@ -404,5 +414,6 @@ module.exports = {
         },
   findMatchAndDescription,
   escapeRegex,
-  extractImageUrl
+  extractImageUrl,
+  cleanTextForDropdown
 };
