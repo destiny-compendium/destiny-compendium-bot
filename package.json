@@ -1,6 +1,6 @@
 {
   "name": "destiny-compendium-bot",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "description": "",
   "main": "index.js",
   "type": "commonjs",
@@ -17,7 +17,7 @@
     "dotenv": "^16.0.3",
     "fast-xml-parser": "^5.2.5",
     "fs": "^0.0.1-security",
-    "googleapis": "^150.0.1",
+    "googleapis": "^168.0.0",
     "mongoose": "^7.1.1",
     "node-fetch": "^3.3.2",
     "redis": "^5.5.6",

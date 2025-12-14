@@ -1,6 +1,7 @@
 const { CommandInteraction, ButtonInteraction, EmbedBuilder } = require("discord.js");
 const { createLog } = require("../../Handlers/logHandler");
 const globals = require("../../Util/globals");
+const { extractImageUrl } = require("../../Commands/Query/query");
 
 function outdatedEmbed() {
   return new EmbedBuilder()
@@ -44,6 +45,82 @@ module.exports = {
 
             await command.execute(interaction, client);
             createLog(`User "${interaction.user.id}" executed an interaction!`, "INFO", false, interaction.guild.id);
+        } else if (interaction.isStringSelectMenu()) {
+            // Handle query select menu
+            if (interaction.customId.startsWith("query_select_")) {
+                try {
+                    await interaction.deferUpdate();
+
+                    const selectedIndex = parseInt(interaction.values[0]);
+                    const matchesJson = await client.redis.get(`query_matches_${interaction.message.id}`);
+
+                    if (!matchesJson) {
+                        await interaction.editReply({ 
+                            content: "Selection expired. Please run the query again.",
+                            components: [],
+                            embeds: []
+                        });
+                        return;
+                    }
+
+                    const matches = JSON.parse(matchesJson);
+                    const match = matches[selectedIndex];
+
+                    if (!match) {
+                        await interaction.editReply({ 
+                            content: "Invalid selection.",
+                            components: [],
+                            embeds: []
+                        });
+                        return;
+                    }
+
+                    let imageBase64 = null;
+                    
+                    if (match.rawImageCell && typeof match.rawImageCell === 'string') {
+                        const imageUrl = extractImageUrl(match.rawImageCell) || (
+                            match.rawImageCell.startsWith("http") ? match.rawImageCell : null
+                        );
+                    
+                        if (imageUrl) {
+                            try {
+                                imageBase64 = imageUrl;
+                                await client.redis.set(`image.${match.matchedText}`, imageUrl);
+                            } catch (err) {
+                                console.warn("Image store failed:", err.message);
+                            }
+                        }
+                    }
+
+                    const embed = new EmbedBuilder()
+                        .setColor(0x00FF00)
+                        .setTitle(match.matchedText)
+                        .setAuthor({ name: "Destiny Compendium" })
+                        .setDescription(match.description)
+                        .setTimestamp();
+
+                    if (imageBase64) {
+                        embed.setThumbnail(imageBase64);
+                    } else {
+                        embed.setThumbnail("https://i.imgur.com/iR1JvU5.png");
+                    }
+
+                    await interaction.editReply({
+                        embeds: [embed],
+                        components: [],
+                        ephemeral: false
+                    });
+
+                    await client.redis.set(match.matchedText, match.description);
+
+                } catch (error) {
+                    console.error("Error handling query select menu:", error);
+                    await interaction.editReply({ 
+                        content: "An error occurred while processing your selection.",
+                        components: []
+                    });
+                }
+            }
         } else if (interaction.isButton()) {
             if (!data) {
                 return;
