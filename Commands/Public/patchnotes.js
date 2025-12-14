@@ -39,6 +39,11 @@ function timeoutEmbed() {
 
 // Patch data
 const patchData = {
+  "1.4.2": {
+    date: "14/12/2025",
+    description:
+      "Modified the query command to show a dropdown menu if multiple results are found. This allows users to select the exact entry they want to view from a list of matches.\n\nFor info on how to use it, you can do **/help** for the description, or just simply use it via **/query**."
+  },
   "1.4.1": {
     date: "15/08/2025",
     description:
