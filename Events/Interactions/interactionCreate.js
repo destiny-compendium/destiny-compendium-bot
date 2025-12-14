@@ -52,7 +52,7 @@ module.exports = {
                     await interaction.deferUpdate();
 
                     const selectedIndex = parseInt(interaction.values[0]);
-                    const matchesJson = await client.redis.get(`query_matches_${interaction.id}`);
+                    const matchesJson = await client.redis.get(`query_matches_${interaction.message.id}`);
 
                     if (!matchesJson) {
                         await interaction.editReply({ 

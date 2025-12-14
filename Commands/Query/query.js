@@ -382,8 +382,10 @@ module.exports = {
                 });
 
                 // Store matches in a temporary cache for the selection handler
-                await client.redis.set(`query_matches_${interaction.id}`, JSON.stringify(matches));
-                await client.redis.expire(`query_matches_${interaction.id}`, 3600); // Expire after 1 hour
+                // Use the message ID so select menu interactions can retrieve it
+                const message = await interaction.fetchReply();
+                await client.redis.set(`query_matches_${message.id}`, JSON.stringify(matches));
+                await client.redis.expire(`query_matches_${message.id}`, 3600); // Expire after 1 hour
               }
 
               clearTimeout(timeout);
