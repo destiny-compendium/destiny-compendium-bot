@@ -39,6 +39,11 @@ function timeoutEmbed() {
 
 // Patch data
 const patchData = {
+  "1.4.3": {
+    date: "26/12/2025",
+    description:
+      "Modified the query command to auto-correct for common typos, misspellings and errors.\n\nFor info on how to use it, you can do **/help** for the description, or just simply use it via **/query**."
+  },
   "1.4.2": {
     date: "14/12/2025",
     description:
