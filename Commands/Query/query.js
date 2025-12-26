@@ -38,6 +38,147 @@ function cleanTextForDropdown(str) {
   return cleaned;
 }
 
+// Distance-based helpers for fuzzy matching
+function normalizeForDistance(str) {
+  return (str || '')
+    .toLowerCase()
+    .normalize('NFKD')
+    .replace(/[^a-z0-9]+/g, '');
+}
+
+function levenshtein(a, b) {
+  const m = a.length;
+  const n = b.length;
+  if (m === 0) return n;
+  if (n === 0) return m;
+  const dp = Array.from({ length: m + 1 }, (_, i) => new Array(n + 1).fill(0));
+  for (let i = 0; i <= m; i++) dp[i][0] = i;
+  for (let j = 0; j <= n; j++) dp[0][j] = j;
+  for (let i = 1; i <= m; i++) {
+    const ca = a.charCodeAt(i - 1);
+    for (let j = 1; j <= n; j++) {
+      const cb = b.charCodeAt(j - 1);
+      const cost = ca === cb ? 0 : 1;
+      dp[i][j] = Math.min(
+        dp[i - 1][j] + 1,      // deletion
+        dp[i][j - 1] + 1,      // insertion
+        dp[i - 1][j - 1] + cost // substitution
+      );
+    }
+  }
+  return dp[m][n];
+}
+
+function similarityRatio(a, b) {
+  if (!a && !b) return 1;
+  const da = normalizeForDistance(a);
+  const db = normalizeForDistance(b);
+  if (da.length === 0 || db.length === 0) return 0;
+  const dist = levenshtein(da, db);
+  const denom = Math.max(da.length, db.length);
+  return 1 - dist / denom; // 0..1, higher is better
+}
+
+// Collapse duplicated letters to improve tolerance to repeated keystrokes
+function condenseRepeats(normalizedStr) {
+  const s = (normalizedStr || '');
+  // Reduce any run of the same alphanumeric to a single occurrence
+  return s.replace(/([a-z0-9])\1+/gi, '$1');
+}
+
+// Similarity that also considers a condensed (duplicate-collapsed) comparison
+function similarityRatioWithRepeatTolerance(a, b) {
+  const da = normalizeForDistance(a);
+  const db = normalizeForDistance(b);
+  if (da.length === 0 || db.length === 0) return 0;
+
+  const baseDist = levenshtein(da, db);
+  const baseDenom = Math.max(da.length, db.length);
+  const baseRatio = 1 - baseDist / baseDenom;
+
+  const daC = condenseRepeats(da);
+  const dbC = condenseRepeats(db);
+  const condDist = levenshtein(daC, dbC);
+  const condDenom = Math.max(daC.length, dbC.length);
+  const condRatio = 1 - condDist / condDenom;
+
+  return Math.max(baseRatio, condRatio);
+}
+
+function getDescriptionForCell(row, prevRow, nextRow, i, maxLookahead, isArtifact) {
+  const normalize = str => (str || '').toLowerCase().replace(/['\s-]/g, '');
+
+  // Find nearby image (simple left/right scan)
+  let rawImageCell = null;
+  for (let offset = 1; offset < row.length; offset++) {
+    const leftIndex = i - offset;
+    const rightIndex = i + offset;
+
+    if (leftIndex >= 0) {
+      const left = row[leftIndex];
+      if (left && typeof left === 'string' && (left.includes('=IMAGE(') || left.startsWith('http'))) {
+        rawImageCell = left;
+        break;
+      }
+    }
+
+    if (rightIndex < row.length) {
+      const right = row[rightIndex];
+      if (right && typeof right === 'string' && (right.includes('=IMAGE(') || right.startsWith('http'))) {
+        rawImageCell = right;
+        break;
+      }
+    }
+  }
+
+  let description = '';
+  let validDesc = false;
+
+  if (isArtifact) {
+    if (!nextRow || nextRow.length === 0) return null;
+    const potentialDesc = nextRow[i - 1];
+    if (typeof potentialDesc === 'string' && potentialDesc.toUpperCase().includes('IMAGE')) {
+      return null;
+    }
+    description = potentialDesc;
+    validDesc = true;
+  } else {
+    for (let j = 1; j <= maxLookahead; j++) {
+      const next = row[i + j];
+      if (next && typeof next === 'string' && next.trim()) {
+        if (next.toUpperCase().includes('IMAGE')) {
+          continue;
+        }
+
+        if ((row[i] || '').length > 250) return null;
+
+        if (grenadeAspects.includes(row[i]) || (row[i] || '').toLowerCase().includes('handheld')) {
+          if (
+            prevRow &&
+            typeof prevRow[i] === 'string' &&
+            ignoreGrenadeList.some(kw => normalize(prevRow[i]).includes(kw))
+          ) {
+            return null;
+          }
+        }
+
+        description = next;
+        validDesc = true;
+
+        const additional = nextRow?.[i + j];
+        const shouldAppend = typeof additional === 'string' && doubleLineEntries.some(kw => (row[i] || '').includes(kw));
+        if (shouldAppend) {
+          description += `\n\n${additional};`;
+        }
+        break;
+      }
+    }
+  }
+
+  if (!validDesc) return null;
+  return { description, rawImageCell };
+}
+
 function failEmbed(query, processTime) {
   return new EmbedBuilder()
 	  .setColor(0xFF0000)
@@ -90,81 +231,14 @@ function findMatchAndDescription(row, prevRow, nextRow, query, maxLookahead, isA
     
       console.log(`[MATCH] Found match for '${query}' in cell [${i}]: '${row[i]}'`);
     
-      // image scan
-      let rawImageCell = null;
-      for (let offset = 1; offset < row.length; offset++) {
-        const leftIndex = i - 1;
-        const rightIndex = i + 1;
-      
-        if (leftIndex >= 0) {
-          const left = row[leftIndex];
-          if (left && typeof left === 'string' && (left.includes('=IMAGE(') || left.startsWith('http'))) {
-            rawImageCell = left;
-            console.log(`[IMAGE] Found image to the LEFT at column ${leftIndex}: ${left}`);
-            break;
-          }
-        }
-      
-        if (rightIndex < row.length) {
-          const right = row[rightIndex];
-          if (right && typeof right === 'string' && (right.includes('=IMAGE(') || right.startsWith('http'))) {
-            rawImageCell = right;
-            console.log(`[IMAGE] Found image to the RIGHT at column ${rightIndex}: ${right}`);
-            break;
-          }
-        }
+      const descObj = getDescriptionForCell(row, prevRow, nextRow, i, maxLookahead, isArtifact);
+      if (!descObj) {
+        console.log(`[DESC] No valid description found`);
+        return null;
       }
-
-      if (isArtifact) {
-        if (!nextRow || nextRow.length === 0) return null;
-      
-        const potentialDesc = nextRow[i - 1];
-        if (typeof potentialDesc === 'string' && potentialDesc.toUpperCase().includes('IMAGE')) {
-          console.log(`[DESC] Skipped nextRow[${i - 1}] because it includes IMAGE`);
-          return null;
-        }
-      
-        description = potentialDesc;
-        validDesc = true;
-        console.log(`[DESC] Artifact mode: using nextRow[${i - 1}] as description`);
-      } else {
-        for (let j = 1; j <= maxLookahead; j++) {
-          const next = row[i + j];
-          if (next && next.trim()) {
-            if (next.toUpperCase().includes('IMAGE')) {
-              console.log(`[DESC] Skipped row[${i + j}] as it includes IMAGE`);
-              continue;
-            }
-      
-            if (row[i].length > 250) return null;
-      
-            if (grenadeAspects.includes(row[i]) || row[i].toLowerCase().includes("handheld")) {
-              if (
-                prevRow &&
-                typeof prevRow[i] === 'string' &&
-                ignoreGrenadeList.some(kw => normalize(prevRow[i]).includes(kw))
-              ) {
-                console.log(`[SKIP] Skipping grenade aspect due to blacklist`);
-                return null;
-              }
-            }
-      
-            description = next;
-            validDesc = true;
-
-            const additional = nextRow?.[i + j];
-            const shouldAppend = typeof additional === "string" && doubleLineEntries.some(kw => row[i].includes(kw));
-
-            if (shouldAppend) {
-              description += `\n\n${additional};`
-              console.log(`[DESC+] Appended additional line from nextRow[${i + j}]`);
-            }
-
-            console.log(`[DESC] Using row[${i + j}] as description`);
-            break;
-          }
-        }
-      }
+      description = descObj.description;
+      validDesc = true;
+      const rawImageCell = descObj.rawImageCell;
 
       if (!validDesc) {
         console.log(`[DESC] No valid description found`);
@@ -194,6 +268,62 @@ function findMatchAndDescription(row, prevRow, nextRow, query, maxLookahead, isA
         rawImageCell
       };
     }
+  }
+
+  return null;
+}
+
+function findBestFuzzyMatch(rows, query, maxLookahead, isArtifact) {
+  const subclassKeywords = ['solar', 'arc', 'void', 'kinetic', 'strand', 'stasis'];
+  const subclassIcons = require("../../Resources/resources.json").icons;
+
+  const candidates = [];
+  for (let r = 0; r < rows.length; r++) {
+    const row = rows[r];
+    for (let c = 0; c < row.length; c++) {
+      const cell = row[c];
+      if (!cell || typeof cell !== 'string') continue;
+      const ratio = similarityRatioWithRepeatTolerance(cell, query);
+      if (!isFinite(ratio)) continue;
+      // Collect all; we'll filter by threshold after sorting
+      candidates.push({ r, c, cell, ratio });
+    }
+  }
+
+  // Sort by highest similarity first
+  candidates.sort((a, b) => b.ratio - a.ratio);
+
+  const MIN_RATIO = 0.6; // tolerant for typos
+  for (const cand of candidates.slice(0, 50)) { // try top 50 to keep it fast
+    if (cand.ratio < MIN_RATIO) break;
+    const row = rows[cand.r];
+    const prev = cand.r > 0 ? rows[cand.r - 1] : null;
+    const next = cand.r < rows.length - 1 ? rows[cand.r + 1] : null;
+
+    const descObj = getDescriptionForCell(row, prev, next, cand.c, maxLookahead, isArtifact);
+    if (!descObj || !descObj.description) continue;
+
+    let formattedDescription = descObj.description.replace(
+      /(\[?[x+~-]?\d+(?:\.\d+)?(?:[+x*/-]\d+)*(?:[%a-zA-Z]+)?\]?)/g,
+      '**$1**'
+    );
+
+    for (const keyword of subclassKeywords) {
+      const emoji = subclassIcons[keyword];
+      if (!emoji) continue;
+      const re = new RegExp(`\\b(${keyword})\\b`, 'gi');
+      formattedDescription = formattedDescription.replace(re, `${emoji} $1`);
+    }
+
+    return {
+      matchedText: row[cand.c],
+      label: row[0] || row[1] || '',
+      description: formattedDescription,
+      sourceColumn: cand.c,
+      foundIn: row,
+      rawImageCell: descObj.rawImageCell,
+      similarity: cand.ratio
+    };
   }
 
   return null;
@@ -308,10 +438,52 @@ module.exports = {
               }
 
               if (matches.length === 0) {
+                // Fuzzy fallback: find closest result for typos/misspellings
+                const best = findBestFuzzyMatch(rows, query, maxLookahead, isArtifact);
+                if (!best) {
+                  await interaction.editReply({
+                    embeds: [failEmbed(query, Date.now() - interaction.createdTimestamp)],
+                    ephemeral: false
+                  });
+                  clearTimeout(timeout);
+                  replied = true;
+                  return;
+                }
+
+                const processTimeFuzzy = Date.now() - interaction.createdTimestamp;
+
+                let imageBase64 = null;
+                if (best.rawImageCell && typeof best.rawImageCell === 'string') {
+                  const imageUrl = extractImageUrl(best.rawImageCell) || (
+                    best.rawImageCell.startsWith("http") ? best.rawImageCell : null
+                  );
+                  if (imageUrl) {
+                    try {
+                      imageBase64 = imageUrl;
+                      await client.redis.set(`image.${best.matchedText}`, imageUrl);
+                    } catch (err) {
+                      console.warn("Image store failed:", err.message);
+                    }
+                  }
+                }
+
+                const percent = Math.round((best.similarity || 0) * 100);
+                const embed = new EmbedBuilder()
+                  .setColor(0xF1C40F)
+                  .setTitle(best.matchedText)
+                  .setAuthor({ name: "Destiny Compendium" })
+                  .setDescription(best.description)
+                  .setTimestamp()
+                  .setFooter({ text: `No exact match. Showing closest (${percent}%). Auto-corrected from '${query}'. Processed in ${processTimeFuzzy} ms` });
+
+                if (imageBase64) embed.setThumbnail(imageBase64); else embed.setThumbnail("https://i.imgur.com/iR1JvU5.png");
+
                 await interaction.editReply({
-                  embeds: [failEmbed(query, Date.now() - interaction.createdTimestamp)],
+                  embeds: [embed],
                   ephemeral: false
                 });
+
+                await client.redis.set(best.matchedText, best.description);
                 clearTimeout(timeout);
                 replied = true;
                 return;
