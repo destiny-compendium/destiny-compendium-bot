@@ -54,16 +54,17 @@ module.exports = {
                     .setColor(0x0000FF)
                     .setTitle("Help Menu")
                     .setAuthor({ name: "Destiny Compendium" })
-                    .setDescription(
-                        `**/query <category> <query>**\nQueries the Destiny Compendium spreadsheet for your desired **query** in the selected **category**.\n
-                        **/list <category> <query>**\nQueries the Destiny Compendium spreadsheet for a listing of entries that match your desired **query** in the selected **category**.\n
-                        **/rotation <category>**\nReturns the current featured activity rotation for the specified category.\n
-                        **/loottable <activity> [graphical]**\nReturns the per-encounter loot table for the specified activity (can set 'graphical' to True for a graphical loot table instead).\n
-                        **/twid**\nReturns the latest Bungie TWID.\n
-                        **/help**\nDisplay this menu.\n
-                        **/info**\nDisplay bot info\n
-                        **/patchnotes**\nBot patch notes\n
-                        **/support**\nGet support contact info`
+                    .setDescription("Available commands for Destiny Compendium:")
+                    .addFields(
+                        { name: "/query <category> <query>", value: "Queries the Destiny Compendium spreadsheet for your desired **query** in the selected **category**.", inline: false },
+                        { name: "/list <category> <query>", value: "Queries the Destiny Compendium spreadsheet for a listing of entries that match your desired **query** in the selected **category**.", inline: false },
+                        { name: "/rotation <category>", value: "Returns the current featured activity rotation for the specified category.", inline: false },
+                        { name: "/loottable <activity> [graphical]", value: "Returns the per-encounter loot table for the specified activity (can set 'graphical' to True for a graphical loot table instead).", inline: false },
+                        { name: "/twid", value: "Returns the latest Bungie TWID.", inline: false },
+                        { name: "/help", value: "Display this menu.", inline: false },
+                        { name: "/info", value: "Display bot info.", inline: false },
+                        { name: "/patchnotes", value: "Bot patch notes.", inline: false },
+                        { name: "/support", value: "Get support contact info.", inline: false }
                     )
                     .setThumbnail("https://i.imgur.com/F9KcQzL.png")
                     .setTimestamp();
