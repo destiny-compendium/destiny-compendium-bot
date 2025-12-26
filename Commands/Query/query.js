@@ -79,6 +79,32 @@ function similarityRatio(a, b) {
   return 1 - dist / denom; // 0..1, higher is better
 }
 
+// Collapse duplicated letters to improve tolerance to repeated keystrokes
+function condenseRepeats(normalizedStr) {
+  const s = (normalizedStr || '');
+  // Reduce any run of the same alphanumeric to a single occurrence
+  return s.replace(/([a-z0-9])\1+/gi, '$1');
+}
+
+// Similarity that also considers a condensed (duplicate-collapsed) comparison
+function similarityRatioWithRepeatTolerance(a, b) {
+  const da = normalizeForDistance(a);
+  const db = normalizeForDistance(b);
+  if (da.length === 0 || db.length === 0) return 0;
+
+  const baseDist = levenshtein(da, db);
+  const baseDenom = Math.max(da.length, db.length);
+  const baseRatio = 1 - baseDist / baseDenom;
+
+  const daC = condenseRepeats(da);
+  const dbC = condenseRepeats(db);
+  const condDist = levenshtein(daC, dbC);
+  const condDenom = Math.max(daC.length, dbC.length);
+  const condRatio = 1 - condDist / condDenom;
+
+  return Math.max(baseRatio, condRatio);
+}
+
 function getDescriptionForCell(row, prevRow, nextRow, i, maxLookahead, isArtifact) {
   const normalize = str => (str || '').toLowerCase().replace(/['\s-]/g, '');
 
@@ -257,7 +283,7 @@ function findBestFuzzyMatch(rows, query, maxLookahead, isArtifact) {
     for (let c = 0; c < row.length; c++) {
       const cell = row[c];
       if (!cell || typeof cell !== 'string') continue;
-      const ratio = similarityRatio(cell, query);
+      const ratio = similarityRatioWithRepeatTolerance(cell, query);
       if (!isFinite(ratio)) continue;
       // Collect all; we'll filter by threshold after sorting
       candidates.push({ r, c, cell, ratio });
