@@ -370,7 +370,9 @@ module.exports = {
             }, 10000); // 60,000 ms = 60 seconds
             
             if (query === "" || query === null || query === undefined) {
-              interaction.editReply({ embeds: [errorEmbed(true)], ephemeral: false });
+              await interaction.editReply({ embeds: [errorEmbed(true)], ephemeral: false });
+              replied = true;
+              clearTimeout(timeout);
               return;
             }
             
@@ -482,10 +484,14 @@ module.exports = {
                   embeds: [embed],
                   ephemeral: false
                 });
-
-                await client.redis.set(best.matchedText, best.description);
-                clearTimeout(timeout);
                 replied = true;
+                clearTimeout(timeout);
+
+                try {
+                  await client.redis.set(best.matchedText, best.description);
+                } catch (redisErr) {
+                  console.warn("Redis cache failed:", redisErr.message);
+                }
                 return;
               }
 
@@ -529,8 +535,13 @@ module.exports = {
                   embeds: [embed],
                   ephemeral: false
                 });
+                replied = true;
 
-                await client.redis.set(match.matchedText, match.description);
+                try {
+                  await client.redis.set(match.matchedText, match.description);
+                } catch (redisErr) {
+                  console.warn("Redis cache failed:", redisErr.message);
+                }
               } else {
                 // Multiple matches - show as select menu
                 const selectMenu = new StringSelectMenuBuilder()
@@ -562,12 +573,17 @@ module.exports = {
                   components: [row],
                   ephemeral: false
                 });
+                replied = true;
 
                 // Store matches in a temporary cache for the selection handler
                 // Use the message ID so select menu interactions can retrieve it
-                const message = await interaction.fetchReply();
-                await client.redis.set(`query_matches_${message.id}`, JSON.stringify(matches));
-                await client.redis.expire(`query_matches_${message.id}`, 3600); // Expire after 1 hour
+                try {
+                  const message = await interaction.fetchReply();
+                  await client.redis.set(`query_matches_${message.id}`, JSON.stringify(matches));
+                  await client.redis.expire(`query_matches_${message.id}`, 3600); // Expire after 1 hour
+                } catch (cacheErr) {
+                  console.warn("Failed to cache query results:", cacheErr.message);
+                }
               }
 
               clearTimeout(timeout);
