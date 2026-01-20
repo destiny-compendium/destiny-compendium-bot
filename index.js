@@ -30,7 +30,7 @@ redisClient.connect()
 redisClient.select(process.env.REDISDB);
 
 const client = new Client({
-    intents: [ Guilds, GuildMembers, GuildMessages ],
+    intents: [ Guilds, GuildMessages ],
     partials: [ User, Message, GuildMember, ThreadMember ],
 });
 
